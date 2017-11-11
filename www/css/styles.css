@@ -1,0 +1,110 @@
+/*
+   statusbar-overlay sets the background color for the overlay. Black text is the default when the statusbar plugin is not added. When the
+   statusbar plugin is added, it also adds default setting to make the content white via:
+
+       <preference name="StatusBarStyle" value="lightcontent"/>
+
+   Setting the background color to black will allow the default light content (white text/icons) to show on it. The statusbar plugin is included
+   in the config.xml file and will be added by the CLI when you build locally.
+
+   See https://github.com/apache/cordova-plugin-statusbar
+*/
+
+.statusbar-overlay {
+    background: #68b3e4;
+}
+.panel-left {
+    background-color: #68b3e4;
+}
+.panel-left p {
+    font-size: 12pt;
+}
+p {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+}
+.panel-left hr {
+    border-top: 0px solid #8b8b8c;
+}
+.panel-left a {
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+    text-decoration: none;
+}
+.panel-left a:visited {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+    text-decoration: none;
+}
+.panel-footer {
+    position: absolute;
+    margin-bottom: 0px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bolder;
+    font-size: 24pt;
+}
+.panel-footer-version {
+    margin-left: 1em;
+    font-size: 12pt;
+    font-weight: bold;
+}
+.panel-left .x-close-panel {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 24pt;
+    font-weight: bold;
+}
+.panel-left .gettingStartedVideosClose {
+    font-size: 24pt;
+    font-weight: bold;
+}
+.input-printer {
+    float: left;
+    width: 90%;
+    height: 30px;
+    margin-bottom: 5px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+}
+.button-fiftypercent {
+    float: left;
+    width: 45%;
+    height: 40px;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+    font-weight: bolder;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    margin-right: 10px;
+}
+.button-blue {
+    background-color: #5098cc;
+}
+.button-green {
+    background-color: #50cc98;
+}
+.background-gray {
+    background-color: #eeeeee;
+}
+.background-white {
+    background-color: white;
+}
+.no-top-margin {
+    margin-top: -35px;
+}
+.no-left-padding {
+    padding-left: 0px;
+}
+
+.backgroundimg {
+    height: 50%;
+    width: 100%;
+    background: url('../img/c2-r2-header.jpg');
+    background-size: cover;
+    position: absolute;
+    -webkit-filter: blur(3px);
+}
+.after-background {
+    margin-top: 320px;
+}

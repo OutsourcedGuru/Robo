@@ -1,0 +1,84 @@
+<div class="navbar">
+    <div class="navbar-inner">
+        <div class="left">
+            <a href="#" class="back link">
+                <i class="icon icon-back"></i>
+                <span>&nbsp;</span>
+            </a>
+        </div>
+        <div class="center sliding">Add Printer Wizard</div>
+    </div>
+</div>
+
+<div class="pages">
+    <div data-page="add-printer" class="page">
+        <div class="page-content">
+            <div class="content-block no-top-margin no-left-padding">
+
+                <div class="list-block accordion-list">
+                    <ul>
+                    <li class="accordion-item background-gray"><a href="#" class="item-content item-link">
+                        <div class="item-inner">
+                            <div class="item-title">1) Host and Hostname</div>
+                        </div></a>
+                        <div id="idAddPrinterOne" class="accordion-item-content background-white">
+                            <div class="content-block">
+                                <p>Below, you can change your printer's displayed name and IP address/hostname.</p>
+                                <input id="id-printer-display-name" class="input-printer" />
+                                <input id="id-printer-hostname" class="input-printer" />
+                                <button class="button-fiftypercent button-blue">Detect Printers</button>
+                                <button class="button-fiftypercent button-green accordion-item-toggle">Next</button>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="accordion-item background-gray"><a href="#" class="item-content item-link">
+                        <div class="item-inner">
+                            <div class="item-title">2) Printer API Key</div>
+                        </div></a>
+                        <div id="idAddPrinterTwo" class="accordion-item-content background-white">
+                            <div class="content-block">
+                                <p>You can use your phone's camera to scan the QR code of your printer's API key using the scan tool.</p>
+                                <p>The API key can be found on your printer's control screen under Utilities&nbsp;-> Network&nbsp;-> API QR Code.  The QA code is also available on your printer's web dashboard under Settings&nbsp;-> API.</p>
+                                <input id="id-printer-api-key" class="input-printer" />
+                                <button class="button-fiftypercent button-blue">Scan</button>
+                                <button class="button-fiftypercent button-green accordion-item-toggle">Save</button>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="accordion-item background-gray"><a href="#" class="item-content item-link">
+                        <div class="item-inner">
+                            <div class="item-title">3) Webcam URL</div>
+                        </div></a>
+                        <div id="idAddPrinterThree" class="accordion-item-content background-white">
+                            <div class="content-block">
+                                <p>You can optionally view your printer's webcam (if connected) via the app as well.  This lets you monitor your print job.  To do this, the app needs to know the URL of the webcam.</p>
+                                <p>If you know the webcam URL, you can enter it below or tap the button to have the app try to auto-detect the URL.</p>
+                                <input id="id-printer-webcam-url" class="input-printer" />
+                                <button class="button-fiftypercent button-blue">Detect</button>
+                                <button class="button-fiftypercent button-green accordion-item-toggle">Save</button>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="accordion-item background-gray"><a href="#" class="item-content item-link">
+                        <div class="item-inner">
+                            <div class="item-title">4) Finalize Setup</div>
+                        </div></a>
+                        <div id="idAddPrinterFour" class="accordion-item-content background-white">
+                            <div class="content-block">
+                                <p>The final step in the setup process is allowing the app to detect specific settings of your printer's profile including whether it has a heated bed and how movement of the extruders are to be handled.</p>
+                                <p>Tap "Get Profile" to have this happen and once completed you will be returned to the main screen with your new printer ready to use.</p>
+                                <button class="button-fiftypercent button-blue">Get Profile</button>
+                                <button class="button-fiftypercent button-green">Save</button>
+                            </div>
+                        </div>
+                    </li>
+                    </ul>
+                </div>
+                     
+            </div>
+        </div>
+            
+    </div>
+</div>
+
+

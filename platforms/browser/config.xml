@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="fyi.robo.robo" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>Robo</name>
+    <description>
+        An app for controlling your Robo3D printer.
+    </description>
+    <author email="support@robo.fyi" href="http://robo.fyi">
+        Robo.fyi Team
+    </author>
+    <content src="index.html" />
+    <access origin="*" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+    <allow-intent href="tel:*" />
+    <allow-intent href="sms:*" />
+    <allow-intent href="mailto:*" />
+    <allow-intent href="geo:*" />
+    <allow-nagivation href="*://*.robo3d.com/*" />
+    <allow-nagivation href="https://*.google.com/*" />
+    <preference name="DisallowOverscroll" value="true" />
+</widget>
