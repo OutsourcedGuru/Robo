@@ -1,3 +1,5 @@
+var Version = "1.0.1";
+
 // Initialize app
 var myApp = new Framework7();
 
@@ -14,6 +16,7 @@ var mainView = myApp.addView('.view-main', {
 // Handle Cordova Device Ready Event
 $$(document).on('deviceready', function() {
     console.log("deviceready");
+    $$('.panel-footer-version').html('Ver. ' + Version);    
 });
 
 function pad(num, size) {

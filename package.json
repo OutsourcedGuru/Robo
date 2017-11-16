@@ -1,6 +1,6 @@
 {
   "name": "fyi.robo.robo",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "displayName": "Robo",
   "cordova": {
     "platforms": [
@@ -16,9 +16,9 @@
   },
   "dependencies": {
     "cordova-ios": "~4.5.3",
-    "cordova-plugin-whitelist": "~1.2.1",
     "cordova-plugin-console": "~1.0.1",
     "cordova-plugin-inappbrowser": "~1.3.0",
-    "cordova-plugin-statusbar": "~1.0.1"
+    "cordova-plugin-statusbar": "~1.0.1",
+    "cordova-plugin-whitelist": "~1.2.1"
   }
 }
