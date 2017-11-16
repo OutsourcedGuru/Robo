@@ -1,18 +1,24 @@
 {
-    "prepare_queue": {
-        "installed": [],
-        "uninstalled": []
+  "prepare_queue": {
+    "installed": [],
+    "uninstalled": []
+  },
+  "config_munge": {
+    "files": {}
+  },
+  "installed_plugins": {
+    "cordova-plugin-console": {
+      "PACKAGE_NAME": "fyi.robo.robo"
     },
-    "config_munge": {
-        "files": {}
+    "cordova-plugin-inappbrowser": {
+      "PACKAGE_NAME": "fyi.robo.robo"
     },
-    "installed_plugins": {
-        "cordova-plugin-console": {
-            "PACKAGE_NAME": "fyi.robo.robo"
-        },
-        "cordova-plugin-statusbar": {
-            "PACKAGE_NAME": "fyi.robo.robo"
-        }
+    "cordova-plugin-statusbar": {
+      "PACKAGE_NAME": "fyi.robo.robo"
     },
-    "dependent_plugins": {}
+    "cordova-plugin-whitelist": {
+      "PACKAGE_NAME": "fyi.robo.robo"
+    }
+  },
+  "dependent_plugins": {}
 }

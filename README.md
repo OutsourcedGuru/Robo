@@ -14,7 +14,13 @@ For this reason, I decided to re-write the entire portable application using a p
 ## Progress
 The app looks good so far. I've managed to reasonably mimic the original look and feel after the port to PhoneGap/Framework7.
 
-At the moment, it's "greeked-in" and will need further work now to exercise the underlying [OctoPrint API](http://docs.octoprint.org/en/master/api/) for querying the printer.
+![sidemenu](https://user-images.githubusercontent.com/15971213/32874784-3be51bbc-ca49-11e7-9b26-3c64c638df01.png)
+
+![motors](https://user-images.githubusercontent.com/15971213/32874814-6822c9e0-ca49-11e7-9fb5-5bd20e988246.png)
+
+At the moment, it's mostly "greeked-in" and will need further work now to exercise the underlying [OctoPrint API](http://docs.octoprint.org/en/master/api/) for querying the printer.
+
+I'm now starting to pull data from querying the API and placing it where it should reasonably belong.
 
 Comments/questions?  [info@robo.fyi](mailto:info@robo.fyi)
 

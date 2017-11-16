@@ -1,0 +1,11 @@
+{
+  "background_color": "#FFF",
+  "display": "standalone",
+  "name": "Robo",
+  "short_name": "Robo",
+  "version": "fyi.robo.robo",
+  "description": "An app for controlling your Robo3D printer.",
+  "author": "Robo.fyi Team",
+  "icons": [],
+  "start_url": "index.html"
+}

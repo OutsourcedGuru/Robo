@@ -29,9 +29,10 @@
     <preference name="DisallowOverscroll" value="true" />
     <plugin name="cordova-plugin-whitelist" source="npm" spec="~1.2.1" />
     <plugin name="cordova-plugin-console" spec="~1.0.1" />
-    <plugin name="cordova-plugin-statusbar" spec="~1.0.1" />
     <plugin name="cordova-plugin-inappbrowser" source="npm" spec="~1.3.0" />
     <engine name="ios" spec="~4.5.3" />
     <allow-nagivation href="*://*.robo3d.com/*" />
     <allow-nagivation href="https://*.google.com/*" />
+    <plugin name="cordova-plugin-statusbar" spec="~1.0.1" />
+    <engine name="browser" spec="~5.0.1" />
 </widget>
