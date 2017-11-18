@@ -4,7 +4,7 @@
   "name": "Robo",
   "short_name": "Robo",
   "version": "fyi.robo.robo",
-  "description": "An app for controlling your Robo3D printer.",
+  "description": "A multi-platform portable app for querying and controlling a Robo C2 or R2 printer made by Robo 3D.",
   "author": "Robo.fyi Team",
   "icons": [],
   "start_url": "index.html"

@@ -1,4 +1,4 @@
-var Version = "1.0.2";
+var Version = "1.0.3";
 
 // Initialize app
 var myApp = new Framework7();

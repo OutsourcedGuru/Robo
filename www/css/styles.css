@@ -18,7 +18,7 @@
  ::-moz-placeholder {
     font-style: italic;  
  }
- :-ms-input-placeholder {  
+ :-ms-input-placeholder { 
     font-style: italic; 
  }
 .statusbar-overlay {
@@ -169,4 +169,10 @@ p {
     margin-bottom: 12px;
     text-align: center;
     height: 50px;
+}
+.textarea-report {
+    font-style: italic;
+}
+.textarea-report:focus {
+    font-style: normal;
 }
