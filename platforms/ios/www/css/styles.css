@@ -9,7 +9,18 @@
 
    See https://github.com/apache/cordova-plugin-statusbar
 */
-
+::-webkit-input-placeholder {
+    font-style: italic;
+ }
+ :-moz-placeholder {
+    font-style: italic;  
+ }
+ ::-moz-placeholder {
+    font-style: italic;  
+ }
+ :-ms-input-placeholder {  
+    font-style: italic; 
+ }
 .statusbar-overlay {
     background: #68b3e4;
 }

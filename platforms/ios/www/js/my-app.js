@@ -1,4 +1,4 @@
-var Version = "1.0.1";
+var Version = "1.0.2";
 
 // Initialize app
 var myApp = new Framework7();
@@ -30,19 +30,21 @@ function pad(num){
 
 // Option 1. Using page callback for page (for "about" page in this case) (recommended way):
 myApp.onPageInit('printer01', function (page) {
-    const printerName = "10.20.30.64"; //"charming-pascal.local"; //"169.254.49.14";
-    const apiKey =      "31FDBA2199464894B43E71576CE18CDD";
-    const apiKeyAddon = "apikey=" + apiKey;
-    var url =           "";
-    var htmlContent =   "";
-
+    const printerName =         "charming-pascal.local"; //"10.20.30.64"; //"charming-pascal.local"; //"169.254.49.14";
+    const apiKey =              "31FDBA2199464894B43E71576CE18CDD";
+    const apiKeyAddon =         "apikey=" + apiKey;
+    var url =                   "";
+    var htmlContent =           "";
+    var operationalPrinter01 =  false;
+    var printingPrinter01 =     false;
+    var pausedPrinter01 =       false;
+    
     /* ----------------------------------------------------------------------
        Motors
     -------------------------------------------------------------------------*/
     {
         // To-do: Need to query the current jog amount and colorize one of these
         htmlContent = '<p></p>';
-
 
         /* ------------------------------------------------------------------
            Jog amounts
@@ -95,6 +97,35 @@ myApp.onPageInit('printer01', function (page) {
     -------------------------------------------------------------------------*/
 
     /* ----------------------------------------------------------------------
+       Temperature
+    -------------------------------------------------------------------------*/
+    url = "http://" + printerName + "/api/printer?" + apiKeyAddon;
+    $$.getJSON(url, function(jsonData) {
+        var buttonColor = 'button-blue';
+        htmlContent = '<p></p>';
+        var temps = [];
+        if (jsonData.state.flags) {
+            operationalPrinter01 = jsonData.state.flags.operational;
+            printingPrinter01 =    jsonData.state.flags.printing;
+            pausedPrinter01 =      jsonData.state.flags.paused;
+        }
+        if (jsonData.temperature.tool0) {temps.push({'name': 'Extruder1', 'actual': jsonData.temperature.tool0.actual, 'target': jsonData.temperature.tool0.target});}
+        if (jsonData.temperature.tool1) {temps.push({'name': 'Extruder2', 'actual': jsonData.temperature.tool1.actual, 'target': jsonData.temperature.tool1.target});}
+        if (jsonData.temperature.bed)   {temps.push({'name': 'Bed',       'actual': jsonData.temperature.bed.actual,   'target': jsonData.temperature.bed.target});}
+        temps.forEach(function(item) {
+            htmlContent += '<div ' +
+                'style="color:white;font-size:14pt;font-family: Arial, Helvetica, sans-serif;border-radius:5px;padding:5px;margin-bottom:5px;' +
+                '" class="button-file ' + buttonColor + '">' +
+                '<span>' + item.name + '</span><span style="position:relative;float:right">Actual: ' + item.actual + '&deg;C / Target: ' + item.target + '&deg;C</span></div>';
+        });
+        htmlContent += '<p></p>';
+        $$("#idTemperatureDetail").html(htmlContent);
+    });
+    /* ----------------------------------------------------------------------
+       End of Temperature
+    -------------------------------------------------------------------------*/
+
+    /* ----------------------------------------------------------------------
        Settings
     -------------------------------------------------------------------------*/
     url = "http://" + printerName + "/api/settings?" + apiKeyAddon;
@@ -112,8 +143,12 @@ myApp.onPageInit('printer01', function (page) {
                 '" class="button-file ' + buttonColor + '">' +
                 '<span>' + item.name + '</span><span style="position:relative;float:right">' + item.value + '</span></div>';
         });
+        htmlContent += '<p></p>';
         $$("#idSettingsDetail").html(htmlContent);
 
+        /* ------------------------------------------------------------------
+           Filament
+        ---------------------------------------------------------------------*/
         htmlContent = '<p></p>';
         var filaments = [
             {'name': jsonData.temperature.profiles[0].name, 'extruder': jsonData.temperature.profiles[0].extruder, 'bed': jsonData.temperature.profiles[0].bed},
@@ -125,6 +160,7 @@ myApp.onPageInit('printer01', function (page) {
                 '" class="button-file ' + buttonColor + '">' +
                 '<span>' + item.name + '</span><span style="position:relative;float:right">Extruder: ' + item.extruder + '&deg;C, Bed: ' + item.bed + '&deg;C</span></div>';
         });
+        htmlContent += '<p></p>';
         $$("#idFilamentDetail").html(htmlContent);
     });
     /* ----------------------------------------------------------------------
@@ -147,7 +183,7 @@ myApp.onPageInit('printer01', function (page) {
             var buttonColor = 'button-green';
             if (jsonData.files[i].type_path) {
                 htmlContent += '<div ' +
-                    'style="color:white;font-weight:bolder;font-size:16pt;font-family: Arial, Helvetica, sans-serif;border-radius:5px;padding:5px;margin-bottom:5px;' +
+                    'style="color:white;font-weight:bolder;font-size:12pt;font-family: Arial, Helvetica, sans-serif;border-radius:5px;padding:5px;margin-bottom:5px;' +
                     '" class="button-file ' + buttonColor + '">' +
                     '<img class="img-file ' + buttonColor + '" src="/img/' + iconType + '_48x48.png" width="48" height="48"/>' +
                     '<span style="position:relative;top:3px;">' + jsonData.files[i].name + '</span></div>';
@@ -161,12 +197,13 @@ myApp.onPageInit('printer01', function (page) {
                 var hours = jsonData.files[i].robo_data.time.hours;
                 var minutes = pad(jsonData.files[i].robo_data.time.minutes);
                 htmlContent += '<div ' +
-                    'style="color:white;font-weight:bolder;font-size:16pt;font-family: Arial, Helvetica, sans-serif;border-radius:5px;padding:5px;margin-bottom:5px;' +
+                    'style="color:white;font-weight:bolder;font-size:12pt;font-family: Arial, Helvetica, sans-serif;border-radius:5px;padding:5px;margin-bottom:5px;' +
                     '" class="button-file ' + buttonColor + '">' +
                     '<img class="img-file ' + buttonColor + '" src="/img/' + iconType + '_48x48.png" width="48" height="48"/>' +
                     '<span style="position:relative;top:3px;">' + jsonData.files[i].name + ' (' + hours + ':' + minutes + ')' + '</span></div>';
             }
         }
+        htmlContent += '<p></p>';
         $$("#idFilesDetail").html(htmlContent);
     });
     /* ----------------------------------------------------------------------
