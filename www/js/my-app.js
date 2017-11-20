@@ -1,38 +1,202 @@
-var Version = "1.0.3";
+var Version = "1.0.4";
 
-// Initialize app
+// Here, we're using one 'pageInit' event handler for all pages and selecting one
+// that might need extra initialization. This is a special case in that the home
+// page isn't reached from the Framework7 navigation handler so it won't be fired
+// off in the standard version as seen below for other page initializers.
+var globalArrayPrinterProfiles = [];
+var globalCurrentPrinterName = "";
+document.addEventListener('pageInit', function (e) {
+    // Get page data from event data
+    var page = e.detail.page;
+
+    if (page.name === 'index') {
+        // First, retrieve the existing jsonString of the printer profiles array
+        // from local storage
+        var jsonStringExistingArray = localStorage.getItem('arrayPrinterProfiles');
+        // Then, convert it back into a json object (array)
+        var objArrayExistingPrinterProfiles = JSON.parse(jsonStringExistingArray);
+        // Create an ordinal-based counter for use in determining landing page
+        var ordinalLandingPage = 1;
+        // And store these to our global array for later use
+        objArrayExistingPrinterProfiles.PrinterProfiles.forEach(function(item) {
+            var itemKey;
+            for ( var prop in item ) {
+                itemKey = prop; // Should be 'charming-pascal' on mine
+                break;
+            }
+            var landingPage = 'printer0' + ordinalLandingPage++;
+            var objPrinterState = new PrinterState(itemKey, item[itemKey].hostName, item[itemKey].ipAddress, item[itemKey].apiKey, landingPage);
+            globalArrayPrinterProfiles.push(objPrinterState);
+        });
+
+        // console.log(globalArrayPrinterProfiles[0].getConnectionInfo().hostName);
+        // console.log(document.getElementById('idIndexPagePrinters'));
+        /* --------------------------------------------------------------------
+           So now, we want to add one of these dynamically per printer profile
+           that's in the globalArrayPrinterProfiles array of PrinterState
+           (class-based) objects.
+           --------------------------------------------------------------------
+                                    <li class="background-gray">
+                                        <a href="#" class="item-content item-link">
+                                            <div class="item-inner">
+                                                <div class="item-title printer01">&bull; charming-pascal</div>
+                                            </div>
+                                        </a>
+                                    </li>
+        */
+        var htmlContent = "";
+        globalArrayPrinterProfiles.forEach(function(objItem) {
+            // console.log(objItem.name);
+            // TODO (make this work for more than one printer by determining the page ordinal)
+            htmlContent += '<li class="background-gray">' +
+                '<a href="#" class="item-content item-link">' +
+                '<div class="item-inner">' +
+                '<div class="item-title ' + objItem.appLandingPage + '">' +
+                '&bull; ' + objItem.name + '</div>' +
+                '</div></a></li>';
+        });
+        document.getElementById('idIndexPagePrinters').innerHTML = htmlContent;
+    }
+});
+
+// Initialize app and if we need to use custom DOM library, let's save it to $$ variable:
 var myApp = new Framework7();
-
-// If we need to use custom DOM library, let's save it to $$ variable:
 var $$ = Dom7;
 
-// Add view
+// Add view and because we want to use dynamic navbar, we need to enable it:
 var mainView = myApp.addView('.view-main', {
-    // Because we want to use dynamic navbar, we need to enable it for this view:
     dynamicNavbar: true,
     domCache: true
 });
 
-// Handle Cordova Device Ready Event
+// Handle Cordova Device Ready Event since smartphones take a while to load up.
+// Set the version text in the left panel's footer while we're initializing things.
 $$(document).on('deviceready', function() {
-    console.log("deviceready");
+    //console.log("deviceready");
     $$('.panel-footer-version').html('Ver. ' + Version);    
+    //localStorage.clear();
+    
+    // ------------------------------------------------------------------------
+    // Here, we do some initialization if there are no saved printer profiles
+    // in local storage.
+    // First, retrieve the existing jsonString of the array from local storage
+    var jsonStringExistingArray = localStorage.getItem('arrayPrinterProfiles');
+    if (!jsonStringExistingArray) {
+        //myApp.alert('Initializing local storage');
+        // Looks like the user hasn't save any printers yet, let's save an
+        // empty array
+        var objEmptyArrayPrinterProfiles = { 'PrinterProfiles': [] };
+        // Now convert this into a json string        
+        var jsonStringEmptyArrayPrinterProfiles = JSON.stringify(objEmptyArrayPrinterProfiles);
+        // Finally, save it to local storage
+        localStorage.setItem('arrayPrinterProfiles', jsonStringEmptyArrayPrinterProfiles);
+    } //else myApp.alert('Found initial local storage: ' + jsonStringExistingArray);
+    // ------------------------------------------------------------------------
+
+    // This needs to move to add-printer
+    // var obj = { 'charming-pascal': { 'hostName': 'charming-pascal.local', 'ipAddress': '10.20.30.64', 'apiKey': '31FDBA2199464894B43E71576CE18CDD' }};
+    // addPrinterProfile(obj);
 });
 
-function pad(num, size) {
-    var s = "00" + num;
-    return s.substr(s.length-size);
+/* ----------------------------------------------------------
+   Local storage (stored as json strings)
+   ----------------------------------------------------------
+{
+    'PrinterProfiles':
+        [
+            {
+                charming-pascal': { 'hostName': 'charming-pascal.local', 'ipAddress': '10.20.30.64' }
+            }
+        ]
+}
+*/
+
+/**
+ * Add a new printer profile object in the local storage array if it doesn't
+ * already exist; overwrite it otherwise (TODO).
+ * 
+ * @param {object} - The incoming JSON printer profile information
+ */
+function addPrinterProfile(objIncomingPrinterProfile) {
+    // First, retrieve the existing jsonString of the array from local storage
+    var jsonStringExistingArray = localStorage.getItem('arrayPrinterProfiles');
+    // Then, convert it back into a json object (array)
+    var objArrayExistingPrinterProfiles = JSON.parse(jsonStringExistingArray);
+    // Look up the incoming printer to see if it's already there
+    var incomingKey;
+    for ( var prop in objIncomingPrinterProfile ) {
+        incomingKey = prop; // Should be 'charming-pascal' on mine
+        break;
+    }
+    // Does it already exist?
+    if (objArrayExistingPrinterProfiles[incomingKey]) {
+        // TODO (ignores at the moment)
+    } else {
+        // Okay, let's add it then
+        // objIncomingPrinterProfile should look like: 
+        // { 'charming-pascal': { 'hostName': 'charming-pascal.local', 'ipAddress': '10.20.30.64', 'apiKey': 'hexstring' }}
+        objArrayExistingPrinterProfiles.PrinterProfiles.push(objIncomingPrinterProfile);
+        myApp.alert(JSON.stringify(objArrayExistingPrinterProfiles));
+        // Now convert the object into a json string for saving back to storage
+        var jsonStringNewPrinterProfiles = JSON.stringify(objArrayExistingPrinterProfiles);
+        // Finally, save it back to local storage
+        localStorage.setItem('arrayPrinterProfiles', jsonStringNewPrinterProfiles);        
+    }
 }
 
+/**
+ * Return an array of printer profiles, as stored in local storage.
+ * 
+ */
+function getPrinterProfiles() {
+    var jsonString = localStorage.getItem('arrayPrinterProfiles');
+    var objArrayPrinterProfiles = JSON.parse(jsonString);
+    return objArrayPrinterProfiles;
+}
+
+/**
+ * Pad the single-digit integer minutes, for example, to two digits as a string
+ * 
+ * @param {Number} - The (probably) one or two-digit number
+ */
 function pad(num){
     return ('00' + num).substr(-2);
 }
 
-// Option 1. Using page callback for page (for "about" page in this case) (recommended way):
+// Upon clicking the left panel's video link, toggle visibility... and then back
+$$('.gettingStartedVideos').on('click', function () {
+    document.getElementById('videosLeft').style.display = 'block';
+    document.getElementById('mainLeft').style.display =   'none';
+});   
+$$('.gettingStartedVideosClose').on('click', function () {
+    document.getElementById('videosLeft').style.display = 'none';
+    document.getElementById('mainLeft').style.display =   'block';
+});
+
+// Page loader for the printerProfile[0] click
+$$('.printer01').on('click', function () {
+    mainView.router.loadPage('printer01.html');
+});
+// Here, we're using a page callback for the printerProfile[0] page:
 myApp.onPageInit('printer01', function (page) {
-    const printerName =         "charming-pascal.local"; //"10.20.30.64"; //"charming-pascal.local"; //"169.254.49.14";
-    const apiKey =              "31FDBA2199464894B43E71576CE18CDD";
-    const apiKeyAddon =         "apikey=" + apiKey;
+    var printerName =          "";
+    var printerIpAddress =     "";
+    var printerApiKey =        "";
+    // Also, we need to push the printer's name to the top of each landing page
+    globalArrayPrinterProfiles.forEach(function(objItem) {
+        if (objItem.appLandingPage === page.name) {
+            printerName =      objItem.name;
+            printerIpAddress = objItem.ipAddress;
+            printerApiKey =    objItem.apiKey;
+            $$("#idPrinterTitle").html(objItem.name);
+        }
+    });            
+    const printerHostName =     printerName + ".local"; //"10.20.30.64"; //"169.254.49.14";
+    // const printerHostName =     printerIpAddress;
+    // TODO finish add-printer and remove this
+    //const apiKey =              "31FDBA2199464894B43E71576CE18CDD";
+    const apiKeyAddon =         "apikey=" + printerApiKey;
     var url =                   "";
     var htmlContent =           "";
     var operationalPrinter01 =  false;
@@ -99,7 +263,7 @@ myApp.onPageInit('printer01', function (page) {
     /* ----------------------------------------------------------------------
        Temperature
     -------------------------------------------------------------------------*/
-    url = "http://" + printerName + "/api/printer?" + apiKeyAddon;
+    url = "http://" + printerHostName + "/api/printer?" + apiKeyAddon;
     $$.getJSON(url, function(jsonData) {
         var buttonColor = 'button-blue';
         htmlContent = '<p></p>';
@@ -128,7 +292,7 @@ myApp.onPageInit('printer01', function (page) {
     /* ----------------------------------------------------------------------
        Settings
     -------------------------------------------------------------------------*/
-    url = "http://" + printerName + "/api/settings?" + apiKeyAddon;
+    url = "http://" + printerHostName + "/api/settings?" + apiKeyAddon;
     $$.getJSON(url, function(jsonData) {
         var buttonColor = 'button-blue';
         htmlContent = '<p></p>';
@@ -170,7 +334,7 @@ myApp.onPageInit('printer01', function (page) {
     /* ----------------------------------------------------------------------
        Files
     -------------------------------------------------------------------------*/
-    url = "http://" + printerName + "/api/files?recursive=true&" + apiKeyAddon;
+    url = "http://" + printerHostName + "/api/files?recursive=true&" + apiKeyAddon;
     $$.getJSON(url, function(jsonData) {
         // At this point, we have a jsonData object which includes jsonData.files[]
         // as an array of objects:
@@ -211,34 +375,19 @@ myApp.onPageInit('printer01', function (page) {
     -------------------------------------------------------------------------*/
 });
 
-// Option 2. Using one 'pageInit' event handler for all pages:
-$$(document).on('pageInit', function (e) {
-    // Get page data from event data
-    var page = e.detail.page;
+// Here, we're using one 'pageInit' event handler for all pages and selecting one
+// that might need extra initialization:
+// $$(document).on('pageInit', function (e) {
+//     // Get page data from event data
+//     var page = e.detail.page;
 
-    if (page.name === 'about') {
-        // Following code will be executed for page with data-page attribute equal to "about"
-        console.log('Global pageInit handler with if statement');
-        // myApp.alert()
-    }
-})
-
-$$('.gettingStartedVideos').on('click', function () {
-    document.getElementById('videosLeft').style.display = 'block';
-    document.getElementById('mainLeft').style.display = 'none';
-});   
-
-$$('.gettingStartedVideosClose').on('click', function () {
-    document.getElementById('videosLeft').style.display = 'none';
-    document.getElementById('mainLeft').style.display = 'block';
-});
-
-$$('.printer01').on('click', function () {
-    mainView.router.loadPage('printer01.html');
-});
-
-// Option 2. Using live 'pageInit' event handlers for each page
-$$(document).on('pageInit', '.page[data-page="about"]', function (e) {
-    // Following code will be executed for page with data-page attribute equal to "about"
-    console.log('pageInit with selector for about');
-})
+//     if (page.name === 'about') {
+//         //console.log('Global pageInit handler with if statement');
+//         // myApp.alert()
+//     }
+// })
+// Here, we're using live 'pageInit' event handlers for each page
+// $$(document).on('pageInit', '.page[data-page="about"]', function (e) {
+//     // Following code will be executed for page with data-page attribute equal to "about"
+//     //console.log('pageInit with selector for about');
+// })
