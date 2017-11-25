@@ -8,12 +8,14 @@
  * @param {String} hostName  -      The printer's hostName  ("charming-pascal.local)
  * @param {String} ipAddress  -     The printer's ipAddress ("192.168.0.5")
  * @param {String} apiKey -         The printer's apiKey    (hexdigits)
+ * @param {String} webcamUrl -      The printer's webcamUrl ("http://charming-pascal.local:8080/?action=stream")
  * @param {String} appLandingPage - Name of page            ("printer01")
  */
-function PrinterState(name, hostName, ipAddress, apiKey, appLandingPage) {
+function PrinterState(name, hostName, ipAddress, apiKey, webcamUrl, appLandingPage) {
     this.name = name;
     this.setConnectionInfo(hostName, ipAddress);
     this.apiKey = apiKey;
+    this.webcamUrl = webcamUrl;
     this.appLandingPage = appLandingPage;
 }
 
@@ -50,6 +52,15 @@ PrinterState.prototype.toString = function() {
     return this.name;
 };
 
+/**
+ * Get PrinterState webcam URL.
+ * 
+ * @return {Object}
+ */
+PrinterState.prototype.getWebcamUrl = function() {
+    return this.webcamUrl;
+  };
+  
 /**
  * Get PrinterState landing page.
  * 

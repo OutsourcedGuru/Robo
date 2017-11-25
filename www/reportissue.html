@@ -8,20 +8,20 @@
         </div>
         <div class="center sliding">Report an App Issue</div>
         <div class="right">
-            <a href="#" class="link">
-                <span>Send</span>
+            <a id="idReportIssueSendLink" nohref>
+                Send
             </a>
         </div>
     </div>
 </div>
 
 <div class="pages">
-    <div data-page="add-printer" class="page">
+    <div data-page="reportissue" class="page">
         <div class="page-content">
             <div class="content-block no-top-margin no-left-padding">
 
                 <div class="content-block-title">&nbsp;</div>
-                <div class="list-block">
+                <form id="idReportIssue" class="list-block store-data">
                     <ul>
                         <li>
                             <div class="item-content">
@@ -30,7 +30,7 @@
                                 </div>
                                 <div class="item-inner">
                                     <div class="item-input">
-                                        <input type="email" value="support@robo.fyi" disabled>
+                                        <input name="recipient" type="email" value="support@robo.fyi" disabled>
                                     </div>
                                 </div>
                             </div>
@@ -42,7 +42,7 @@
                                 </div>
                                 <div class="item-inner">
                                     <div class="item-input">
-                                        <input type="email" value="Robo app issue" disabled>
+                                        <input name="subject" type="email" value="Robo app issue" disabled>
                                     </div>
                                 </div>
                             </div>
@@ -54,7 +54,7 @@
                                 </div>
                                 <div class="item-inner">
                                     <div class="item-input">
-                                        <input type="text" placeholder="Your name">
+                                        <input name="name" type="text" placeholder="Your name">
                                     </div>
                                 </div>
                             </div>
@@ -66,7 +66,7 @@
                                 </div>
                                 <div class="item-inner">
                                     <div class="item-input">
-                                        <input type="email" placeholder="Your email address">
+                                        <input name="email" type="email" placeholder="Your email address">
                                     </div>
                                 </div>
                             </div>
@@ -78,7 +78,7 @@
                                 </div>
                                 <div class="item-inner">
                                     <div class="item-input">
-                                        <input type="tel" placeholder="Your phone number">
+                                        <input name="phone" type="tel" placeholder="Your phone number">
                                     </div>
                                 </div>
                             </div>
@@ -90,18 +90,19 @@
                                 </div>
                                 <div class="item-inner">
                                     <div class="item-input">
-                                        <textarea class="textarea-report resizable" rows="12">(Describe the issue you are having with the app.)</textarea>
+                                        <textarea name="body" class="textarea-report resizable" rows="12">(Describe the issue you are having with the app.)</textarea>
                                     </div>
                                 </div>
                             </div>
                         </li>
 
-
-
                     </ul>
+                </form>
+            </div>
+            <div class="content-block">
+                    <div id="idDivReportIssue"></div>
                 </div>
             </div>
-        </div>
 
     </div>
 </div>

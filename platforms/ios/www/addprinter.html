@@ -8,7 +8,7 @@
         </div>
         <div class="center sliding">Add Printer Wizard</div>
         <div class="right">
-            <a href="add-printer-info-dialog.html" class="link">
+            <a href="addprinterinfodialog.html" class="link">
                 <i class="icon f7-icons">info</i>
             </a>
         </div>
@@ -16,10 +16,10 @@
 </div>
 
 <div class="pages">
-    <div data-page="add-printer" class="page">
+    <div data-page="addprinter" class="page">
         <div class="page-content">
             <div class="content-block no-top-margin no-left-padding">
-
+                <form id="idAddPrinterForm" class="list-block store-data">
                 <div class="list-block accordion-list">
                     <ul>
                     <li class="accordion-item accordion-item-expanded background-gray"><a href="#" class="item-content item-link">
@@ -29,9 +29,9 @@
                         <div id="idAddPrinterOne" class="accordion-item-content background-white">
                             <div class="content-block">
                                 <p>Below, you can change your printer's displayed name and IP address/hostname.</p>
-                                <input id="id-printer-display-name" class="input-printer" placeholder="serial-number" />
-                                <input id="id-printer-hostname" class="input-printer" placeholder="serial-number.local" />
-                                <button class="button-hundredpercent button-green accordion-item-toggle">Next</button>
+                                <input name="addPrinterDisplayName" id="id-printer-display-name" class="input-printer" placeholder="serial-number" />
+                                <input name="addPrinterHostName" id="id-printer-hostname" class="input-printer" placeholder="serial-number.local" />
+                                <!--button id="id-button-host" class="button-hundredpercent button-green accordion-item-toggle">Next</button-->
                             </div>
                         </div>
                     </li>
@@ -41,11 +41,9 @@
                         </div></a>
                         <div id="idAddPrinterTwo" class="accordion-item-content background-white">
                             <div class="content-block">
-                                <p>You can use your phone's camera to scan the QR code of your printer's API key using the scan tool.</p>
                                 <p>The API key can be found on your printer's control screen under Utilities&nbsp;-> Network&nbsp;-> API QR Code.  The QA code is also available on your printer's web dashboard under Settings&nbsp;-> API.</p>
-                                <input id="id-printer-api-key" class="input-printer" placeholder="hexadecimal-digits" />
-                                <button class="button-fiftypercent button-blue">Scan</button>
-                                <button class="button-fiftypercent button-green accordion-item-toggle">Save</button>
+                                <input name="addPrinterApiKey" id="id-printer-api-key" class="input-printer" placeholder="hexadecimal-digits" />
+                                <!--button class="button-hundredpercent button-green accordion-item-toggle">Save</button-->
                             </div>
                         </div>
                     </li>
@@ -57,8 +55,8 @@
                             <div class="content-block">
                                 <p>You can optionally view your printer's webcam (if connected) via the app as well.  This lets you monitor your print job.  To do this, the app needs to know the URL of the webcam.</p>
                                 <p>If you know the webcam URL, you can enter it below.</p>
-                                <input id="id-printer-webcam-url" class="input-printer" placeholder="http://serial-number.local:8080/?action=stream" />
-                                <button class="button-hundredpercent button-green accordion-item-toggle">Save</button>
+                                <input name="addPrinterWebcamUrl" id="id-printer-webcam-url" class="input-printer" placeholder="http://serial-number.local:8080/?action=stream" />
+                                <!--button class="button-hundredpercent button-green accordion-item-toggle">Save</button-->
                             </div>
                         </div>
                     </li>
@@ -68,16 +66,14 @@
                         </div></a>
                         <div id="idAddPrinterFour" class="accordion-item-content background-white">
                             <div class="content-block">
-                                <p>The final step in the setup process is allowing the app to detect specific settings of your printer's profile including whether it has a heated bed and how movement of the extruders are to be handled.</p>
-                                <p>Tap "Get Profile" to have this happen and once completed you will be returned to the main screen with your new printer ready to use.</p>
-                                <button class="button-fiftypercent button-blue">Get Profile</button>
-                                <button class="button-fiftypercent button-green">Save</button>
+                                <p>Click the Save button to complete your printer's profile.</p>
+                                <button id="idSaveButtonAddPrinter" class="button-hundredpercent button-green">Save</button>
                             </div>
                         </div>
                     </li>
                     </ul>
                 </div>
-                     
+                </form>         
             </div>
         </div>
             
