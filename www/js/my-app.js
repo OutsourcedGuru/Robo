@@ -1,4 +1,4 @@
-var Version = "1.0.5";
+var Version = "1.0.6";
 
 // Here, we're using one 'pageInit' event handler for all pages and selecting one
 // that might need extra initialization. This is a special case in that the home
@@ -28,7 +28,13 @@ document.addEventListener('pageInit', function (e) {
             }
             // console.log('Printer profile: ' + itemKey);
             var landingPage = 'printer0' + ordinalLandingPage++;
-            var objPrinterState = new PrinterState(itemKey, item[itemKey].hostName, item[itemKey].ipAddress, item[itemKey].apiKey, item[itemKey].webcamUrl, landingPage);
+            var objPrinterState = new PrinterState(itemKey,
+                item[itemKey].hostName,
+                item[itemKey].ipAddress,
+                item[itemKey].apiKey,
+                item[itemKey].webcamUrl,
+                item[itemKey].selectedFilament,
+                landingPage);
             globalArrayPrinterProfiles.push(objPrinterState);
         });
 
@@ -106,10 +112,6 @@ $$(document).on('deviceready', function () {
         localStorage.setItem('arrayPrinterProfiles', jsonStringEmptyArrayPrinterProfiles);
     } //else myApp.alert('Found initial local storage: ' + jsonStringExistingArray);
     // ------------------------------------------------------------------------
-
-    // This needs to move to add-printer
-    // var obj = { 'charming-pascal': { 'hostName': 'charming-pascal.local', 'ipAddress': '10.20.30.64', 'apiKey': '31FDBA2199464894B43E71576CE18CDD' }};
-    // addPrinterProfile(obj);
 });
 
 /* ----------------------------------------------------------
@@ -119,7 +121,12 @@ $$(document).on('deviceready', function () {
     'PrinterProfiles':
         [
             {
-                charming-pascal': { 'hostName': 'charming-pascal.local', 'ipAddress': '10.20.30.64' }
+                charming-pascal': {
+                    'hostName': 'charming-pascal.local',
+                    'ipAddress': '10.20.30.64',
+                    'apiKey': 'hexstring',
+                    'webcamUrl': 'http://charming-pascal.local:8080/?actin=stream',
+                    'selectedFilament': 'PLA'}
             }
         ]
 }
@@ -152,7 +159,8 @@ function addPrinterProfile(objIncomingPrinterProfile) {
         //     { 'hostName': 'charming-pascal.local',
         //       'ipAddress': '10.20.30.64',
         //       'apiKey': 'hexstring',
-        //       'webcamUrl': 'http://charming-pascal.local:8080/?action=stream' }}
+        //       'webcamUrl': 'http://charming-pascal.local:8080/?action=stream'
+        //       'selectedFilament': 'PLA' }}
         objArrayExistingPrinterProfiles.PrinterProfiles.push(objIncomingPrinterProfile);
         myApp.alert(JSON.stringify(objArrayExistingPrinterProfiles));
         // Now convert the object into a json string for saving back to storage
@@ -249,7 +257,8 @@ myApp.onPageInit('addprinter', function (page) {
             { "hostName": "charming-pascal.local",
               "ipAddress": "10.20.30.64",
               "apiKey": "hexstring",
-              "webcamUrl": "http://charming-pascal.local:8080/?action=stream" }}        
+              "webcamUrl": "http://charming-pascal.local:8080/?action=stream",
+              "selectedFilament": "PLA" }}        
         */
         var jsonStringNewPrinter = '{ "' +
             objAddPrinter.addPrinterDisplayName +
@@ -259,7 +268,7 @@ myApp.onPageInit('addprinter', function (page) {
             objAddPrinter.addPrinterApiKey +
             '", "webcamUrl": "' +
             objAddPrinter.addPrinterWebcamUrl +
-            '" }}';
+            '", "selectedFilament": "PLA" }}';
         // Then, convert it into a json object
         var objNewPrinter = JSON.parse(jsonStringNewPrinter);
         // And add it to the local storage
@@ -296,17 +305,19 @@ $$('.printer01').on('click', function () {
 });
 // Here, we're using a page callback for the printerProfile[0] page:
 myApp.onPageInit('printer01', function (page) {
-    var printerName =      "";
-    var printerHostName =  "";
-    var printerIpAddress = "";
-    var printerApiKey =    "";
+    var printerName =             "";
+    var printerHostName =         "";
+    var printerIpAddress =        "";
+    var printerApiKey =           "";
+    var printerSelectedFilament = "";
     // Also, we need to push the printer's name to the top of each landing page
     globalArrayPrinterProfiles.forEach(function (objItem) {
         if (objItem.appLandingPage === page.name) {
-            printerName = objItem.name;
-            printerHostName = objItem.hostName;
-            printerIpAddress = objItem.ipAddress;
-            printerApiKey = objItem.apiKey;
+            printerName =             objItem.name;
+            printerHostName =         objItem.hostName;
+            printerIpAddress =        objItem.ipAddress;
+            printerApiKey =           objItem.apiKey;
+            printerSelectedFilament = objItem.selectedFilament;
             $$("#idPrinterTitle").html(objItem.name);
         }
     });
@@ -396,7 +407,7 @@ myApp.onPageInit('printer01', function (page) {
             htmlContent += '<div ' +
                 'style="color:white;font-size:14pt;font-family: Arial, Helvetica, sans-serif;border-radius:5px;padding:5px;margin-bottom:5px;' +
                 '" class="button-file ' + buttonColor + '">' +
-                '<span>' + item.name + '</span><span style="position:relative;float:right">Actual: ' + item.actual + '&deg;C / Target: ' + item.target + '&deg;C</span></div>';
+                '<span>' + item.name + ' (' + printerSelectedFilament + ')</span><span style="position:relative;float:right">Actual: ' + item.actual + '&deg;C / Target: ' + item.target + '&deg;C</span></div>';
         });
         htmlContent += '<p></p>';
         $$("#idTemperatureDetail").html(htmlContent);
@@ -411,7 +422,12 @@ myApp.onPageInit('printer01', function (page) {
     url = "http://" + printerHostName + "/api/settings?" + apiKeyAddon;
     $$.getJSON(url, function (jsonData) {
         var buttonColor = 'button-blue';
-        htmlContent = '<p></p>';
+        /*
+        Honestly, there's not much usefulness in showing the user the COM
+        settings to the Robo board so even though the original app had it,
+        I'm removing it. 
+        */
+        /*htmlContent = '<p></p>';
         var settings = [
             { 'name': 'Baud rate', 'value': jsonData.serial.baudrate },
             { 'name': 'Autoconnect', 'value': jsonData.serial.autoconnect },
@@ -424,24 +440,59 @@ myApp.onPageInit('printer01', function (page) {
                 '<span>' + item.name + '</span><span style="position:relative;float:right">' + item.value + '</span></div>';
         });
         htmlContent += '<p></p>';
-        $$("#idSettingsDetail").html(htmlContent);
+        $$("#idSettingsDetail").html(htmlContent);*/
 
         /* ------------------------------------------------------------------
            Filament
         ---------------------------------------------------------------------*/
+        buttonColor = "button-gray";
         htmlContent = '<p></p>';
         var filaments = [
             { 'name': jsonData.temperature.profiles[0].name, 'extruder': jsonData.temperature.profiles[0].extruder, 'bed': jsonData.temperature.profiles[0].bed },
             { 'name': jsonData.temperature.profiles[1].name, 'extruder': jsonData.temperature.profiles[1].extruder, 'bed': jsonData.temperature.profiles[1].bed }
         ];
         filaments.forEach(function (item) {
+            buttonColor = (printerSelectedFilament === item.name) ? 'button-blue' : 'button-gray';
             htmlContent += '<div ' +
                 'style="color:white;font-size:14pt;font-family: Arial, Helvetica, sans-serif;border-radius:5px;padding:5px;margin-bottom:5px;' +
-                '" class="button-file ' + buttonColor + '">' +
+                '" id="idFilament' + item.name + '" ' +
+                'class="button-file ' + buttonColor + '">' +
                 '<span>' + item.name + '</span><span style="position:relative;float:right">Extruder: ' + item.extruder + '&deg;C, Bed: ' + item.bed + '&deg;C</span></div>';
         });
         htmlContent += '<p></p>';
         $$("#idFilamentDetail").html(htmlContent);
+
+        // Upon clicking the filament button, change filament stored in local storage
+        $$('#idFilamentABS').on('click', function () {
+            document.getElementById('idFilamentABS').className = 'button-file button-blue';
+            document.getElementById('idFilamentPLA').className = 'button-file button-gray';
+            // First, retrieve the existing jsonString of the array from local storage
+            var jsonStringExistingArray = localStorage.getItem('arrayPrinterProfiles');
+            // Then, convert it back into a json object (array)
+            var objArrayExistingPrinterProfiles = JSON.parse(jsonStringExistingArray);
+            objArrayExistingPrinterProfiles.PrinterProfiles[0][printerName].selectedFilament = 'ABS';
+            // Now convert the object into a json string for saving back to storage
+            var jsonStringNewPrinterProfiles = JSON.stringify(objArrayExistingPrinterProfiles);
+            // Finally, save it back to local storage
+            localStorage.setItem('arrayPrinterProfiles', jsonStringNewPrinterProfiles);
+            // Don't forget to save it into the global array
+            globalArrayPrinterProfiles[0].selectedFilament = 'ABS';
+        });
+        $$('#idFilamentPLA').on('click', function () {
+            document.getElementById('idFilamentPLA').className = 'button-file button-blue';
+            document.getElementById('idFilamentABS').className = 'button-file button-gray';
+            // First, retrieve the existing jsonString of the array from local storage
+            var jsonStringExistingArray = localStorage.getItem('arrayPrinterProfiles');
+            // Then, convert it back into a json object (array)
+            var objArrayExistingPrinterProfiles = JSON.parse(jsonStringExistingArray);
+            objArrayExistingPrinterProfiles.PrinterProfiles[0][printerName].selectedFilament = 'PLA';
+            // Now convert the object into a json string for saving back to storage
+            var jsonStringNewPrinterProfiles = JSON.stringify(objArrayExistingPrinterProfiles);
+            // Finally, save it back to local storage
+            localStorage.setItem('arrayPrinterProfiles', jsonStringNewPrinterProfiles);
+            // Don't forget to save it into the global array
+            globalArrayPrinterProfiles[0].selectedFilament = 'PLA';
+        });
     });
     /* ----------------------------------------------------------------------
        End of Settings

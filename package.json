@@ -1,6 +1,6 @@
 {
   "name": "fyi.robo.robo",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "displayName": "Robo",
   "description": "A multi-platform portable app for querying and controlling a Robo C2 or R2 printer made by Robo 3D.",
   "homepage": "https://github.com/OutsourcedGuru/Robo",

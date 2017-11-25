@@ -18,9 +18,37 @@ The app looks good so far. I've managed to reasonably mimic the original look an
 
 ![motors](https://user-images.githubusercontent.com/15971213/32874814-6822c9e0-ca49-11e7-9fb5-5bd20e988246.png)
 
-At the moment, it's mostly "greeked-in" and will need further work now to exercise the underlying [OctoPrint API](http://docs.octoprint.org/en/master/api/) for querying the printer.
+I'm now pulling data by querying the underlying [OctoPrint API](http://docs.octoprint.org/en/master/api/) which is running in the printer's computer. Work is progressing at a rapid pace and I anticipate that it will be completed soon.
 
-I'm now starting to pull data from querying the API and placing it where it should reasonably belong.
+### To-do
+
+- [x] CSS styling
+- [x] X (left panel)
+- [x] Dashboard (left panel)
+- [x] Add a Printer with local storage (home and left panel)
+- [x] Info page for Add a Printer
+- [x] App Settings with profile deletion (left panel)
+- [ ] Cloud Storage (left panel)
+- [x] Getting Started Videos with sub-menu navigation (left panel)
+- [x] User Manual (left panel)
+- [x] Report an App Issue contact page (left panel)
+- [x] Store (left panel)
+- [x] About with callouts to github projects (left panel)
+- [x] Landing page for first printer profile (home page)
+- [x] Info page for first printer profile
+- [x] Styled motor/extruder buttons, temperature and files
+- [ ] Lookup IP address of the printer
+- [ ] Add support for navigating into folders
+- [ ] Remove support for Settings tab for landing page since it doesn't significantly add value
+- [ ] Change settings or jog motor/extruder via API interface
+- [ ] Initiate job from interface
+- [ ] Start video feed (landing page) and show (home page)
+- [x] Save the currently-selected filament type in local storage
+- [ ] Add safety mechanism for jogging the extruder versus the temperature
+- [ ] Pre-heat wizard
+- [ ] Filament wizard
+- [ ] Change filament wizard
+- [ ] Testing with iOS, Android and Microsoft Phone mobile platforms as well as OS X, Windows 10 and Ubuntu 16.04 LTS workstations.
 
 Comments/questions?  [info@robo.fyi](mailto:info@robo.fyi)
 
