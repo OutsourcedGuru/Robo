@@ -1,4 +1,4 @@
-var Version = "1.1.1";
+var Version = "1.1.2";
 
 // Here, we're using one 'pageInit' event handler for all pages and selecting one
 // that might need extra initialization. This is a special case in that the home
@@ -59,12 +59,17 @@ document.addEventListener('pageInit', function (e) {
             globalArrayPrinterProfiles.forEach(function (objItem) {
                 // console.log(objItem.name);
                 // TODO (make this work for more than one printer by determining the page ordinal)
-                htmlContent += '<li class="background-gray">' +
-                    '<a href="#" class="item-content item-link">' +
+                htmlContent += '<li class="background-gray" style="color:red">' +
+                    '<a href="printeroffline.html" class="item-content item-link">' +
                     '<div class="item-inner">' +
-                    '<div class="item-title ' + objItem.appLandingPage + '">' +
-                    '&bull; ' + objItem.name + '</div>' +
+                    '&bull; ' + objItem.name +
                     '</div></a></li>';
+                // htmlContent += '<li class="background-gray">' +
+                //     '<a href="#" class="item-content item-link">' +
+                //     '<div class="item-inner">' +
+                //     '<div class="item-title ' + objItem.appLandingPage + '">' +
+                //     '&bull; ' + objItem.name + '</div>' +
+                //     '</div></a></li>';
             });
         } else {
             htmlContent += '<li class="background-gray">' +
