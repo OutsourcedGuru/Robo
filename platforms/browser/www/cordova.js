@@ -1000,7 +1000,7 @@ module.exports = function (success, fail, service, action, args) {
         }
     } else {
 
-        console.log("Error: exec proxy not found for :: " + service + " :: " + action);
+        //console.log("Error: exec proxy not found for :: " + service + " :: " + action);
         
         if(typeof fail === "function" ) {
             fail("Missing Command Error");
@@ -1020,7 +1020,7 @@ module.exports = {
 
     // example: cordova.commandProxy.add("Accelerometer",{getCurrentAcceleration: function(successCallback, errorCallback, options) {...},...);
     add: function (id, proxyObj) {
-        console.log('adding proxy for ' + id);
+        //console.log('adding proxy for ' + id);
         CommandProxyMap[id] = proxyObj;
         return proxyObj;
     },

@@ -1,4 +1,4 @@
-var Version = "1.0.7";
+var Version = "1.0.8";
 
 // Here, we're using one 'pageInit' event handler for all pages and selecting one
 // that might need extra initialization. This is a special case in that the home
@@ -343,6 +343,7 @@ myApp.onPageInit('printer01', function (page) {
     var printerSelectedFilament = "";
     var selectedJogAmount =       "";
     var selectedMotor =           "";
+    var selectedHeatingElement =  "tool0";
     // Also, we need to push the printer's name to the top of each landing page
     globalArrayPrinterProfiles.forEach(function (objItem) {
         if (objItem.appLandingPage === page.name) {
@@ -656,8 +657,12 @@ myApp.onPageInit('printer01', function (page) {
        Temperature
     -------------------------------------------------------------------------*/
     url = "http://" + printerHostName + "/api/printer?" + apiKeyAddon;
+    var aTools = [];
     $$.getJSON(url, function (jsonData) {
-        var buttonColor = 'button-blue';
+        // TODO Set selectedHeatingElement if button is clicked for Tool0, for example,
+        // and use this when doing later extrude/extract commands. It's probably a
+        // good idea to use the tool ID that OctoPrint expects for this variable's
+        // value.
         htmlContent = '<p></p>';
         var temps = [];
         if (jsonData.state.flags) {
@@ -665,17 +670,90 @@ myApp.onPageInit('printer01', function (page) {
             printingPrinter01 = jsonData.state.flags.printing;
             pausedPrinter01 = jsonData.state.flags.paused;
         }
-        if (jsonData.temperature.tool0) { temps.push({ 'name': 'Extruder1', 'actual': jsonData.temperature.tool0.actual, 'target': jsonData.temperature.tool0.target }); }
-        if (jsonData.temperature.tool1) { temps.push({ 'name': 'Extruder2', 'actual': jsonData.temperature.tool1.actual, 'target': jsonData.temperature.tool1.target }); }
-        if (jsonData.temperature.bed) { temps.push({ 'name': 'Bed', 'actual': jsonData.temperature.bed.actual, 'target': jsonData.temperature.bed.target }); }
+        if (jsonData.temperature.tool0) {
+            temps.push({
+                'tool': 'tool0',
+                'name': 'Extruder1',
+                'actual': jsonData.temperature.tool0.actual,
+                'target': jsonData.temperature.tool0.target,
+                'color': 'button-blue'
+            });
+            aTools.push('tool0');
+        }
+        if (jsonData.temperature.tool1) {
+            temps.push({
+                'tool': 'tool1',
+                'name': 'Extruder2',
+                'actual': jsonData.temperature.tool1.actual,
+                'target': jsonData.temperature.tool1.target,
+                'color': 'button-gray'
+            });
+            aTools.push('tool1');
+        }
+        if (jsonData.temperature.bed)   {
+            temps.push({
+                'tool': 'bed',
+                'name': 'Bed',
+                'actual': jsonData.temperature.bed.actual,
+                'target': jsonData.temperature.bed.target,
+                'color': 'button-gray'
+            });
+            aTools.push('bed');
+        }
         temps.forEach(function (item) {
-            htmlContent += '<div ' +
+            htmlContent += '<div id="idButton-' + item.tool + '" ' +
                 'style="color:white;font-size:14pt;font-family: Arial, Helvetica, sans-serif;border-radius:5px;padding:5px;margin-bottom:5px;' +
-                '" class="button-file ' + buttonColor + '">' +
+                '" class="button-file ' + item.color + '">' +
                 '<span>' + item.name + ' (' + printerSelectedFilament + ')</span><span style="position:relative;float:right">Actual: ' + item.actual + '&deg;C / Target: ' + item.target + '&deg;C</span></div>';
         });
+        // Add a button for preheating the selected tool
+        htmlContent += '<hr width="95%"/>';
+        htmlContent += '<div id="idToolPreheat" ' +
+            '" class="button-preheat button-blue">' +
+            'Preheat Selected Tool</div>';
+        htmlContent += '<p></p>';
+        htmlContent += '<div id="idToolCooldown" ' +
+            'style="display:none" ' +
+            '" class="button-preheat button-blue">' +
+            'Turn Off Heat For Selected Tool</div>';
         htmlContent += '<p></p>';
         $$("#idTemperatureDetail").html(htmlContent);
+
+        // TODO add buttons based on aTools[] for selecting different tools
+        
+        $$('#idToolPreheat').on('click', function () {
+            // myApp.alert('You pressed the Tool Preheat button with ' + printerSelectedFilament + ' and ' + selectedHeatingElement);
+            document.getElementById('idToolPreheat').style.display =  "none";
+            document.getElementById('idToolCooldown').style.display = "inline-block";
+            // api/printer/tool
+            // { "command": "target", "targets": ["tool0": tempTarget] }
+            var tempTarget = 90.0; // 190
+            //myApp.alert(tempTarget);
+            var endPoint = "/api/printer/tool";
+            var objPrinterCommand = JSON.parse('{ "command": "target", "targets": {"' +
+                selectedHeatingElement + '": ' + tempTarget + '}}');
+            // console.log(objPrinterCommand);
+            sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){
+                console.log('Preheat command sent to printer: ' + data);
+            });
+        });
+        $$('#idToolCooldown').on('click', function () {
+            // myApp.alert('You pressed the Tool Cooldown button with ' + printerSelectedFilament + ' and ' + selectedHeatingElement);
+            document.getElementById('idToolCooldown').style.display = "none";
+            document.getElementById('idToolPreheat').style.display =  "inline-block";
+            // api/printer/tool
+            // { "command": "target", "targets": ["tool0": tempTarget] }
+            var tempTarget = 0;
+            //myApp.alert(tempTarget);
+            var endPoint = "/api/printer/tool";
+            var objPrinterCommand = JSON.parse('{ "command": "target", "targets": {"' +
+                selectedHeatingElement + '": ' + tempTarget + '}}');
+            // console.log(objPrinterCommand);
+            sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){
+                console.log('Cooldown command sent to printer: ' + data);
+            });
+        });
+    
     });
     /* ----------------------------------------------------------------------
        End of Temperature
