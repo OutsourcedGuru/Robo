@@ -12,7 +12,7 @@ The original Robo beta app provided by Robo 3D was written for the iOS platform 
 For this reason, I decided to re-write the entire portable application using a platform which is more conducive to cross-platform development, Adobe PhoneGap (Cordova).
 
 ## Progress
-The app looks good so far. I've managed to reasonably mimic the original look and feel after the port to PhoneGap/Framework7.
+The app looks great so far. I've managed to reasonably mimic the original look and feel after the port to PhoneGap/Framework7.
 
 ![sidemenu](https://user-images.githubusercontent.com/15971213/32874784-3be51bbc-ca49-11e7-9b26-3c64c638df01.png)
 
@@ -39,12 +39,14 @@ I'm now pulling data by querying the underlying [OctoPrint API](http://docs.octo
 - [x] Styled motor/extruder buttons, temperature and files
 - [ ] Lookup IP address of the printer
 - [ ] Add support for navigating into folders
-- [ ] Remove support for Settings tab for landing page since it doesn't significantly add value
-- [ ] Change settings or jog motor/extruder via API interface
+- [x] Remove support for Settings tab for landing page since it doesn't significantly add value
+- [ ] Change settings via API interface
+- [x] Jog motor/extruder via API interface
 - [ ] Initiate job from interface
 - [ ] Start video feed (landing page) and show (home page)
 - [x] Save the currently-selected filament type in local storage
 - [ ] Add safety mechanism for jogging the extruder versus the temperature
+- [ ] Add safety mechanism to prevent raising bed too high
 - [ ] Pre-heat wizard
 - [ ] Filament wizard
 - [ ] Change filament wizard

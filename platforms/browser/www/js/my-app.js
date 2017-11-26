@@ -1,4 +1,4 @@
-var Version = "1.0.6";
+var Version = "1.0.7";
 
 // Here, we're using one 'pageInit' event handler for all pages and selecting one
 // that might need extra initialization. This is a special case in that the home
@@ -92,9 +92,7 @@ var mainView = myApp.addView('.view-main', {
 // Handle Cordova Device Ready Event since smartphones take a while to load up.
 // Set the version text in the left panel's footer while we're initializing things.
 $$(document).on('deviceready', function () {
-    //console.log("deviceready");
     $$('.panel-footer-version').html('Ver. ' + Version);
-    //localStorage.clear();
 
     // ------------------------------------------------------------------------
     // Here, we do some initialization if there are no saved printer profiles
@@ -188,6 +186,39 @@ function getPrinterProfiles() {
 function pad(num) {
     return ('00' + num).substr(-2);
 }
+
+/**
+ * Send the specified command to the indicated printer.
+ * 
+ * @param {Number} - The printer ordinal from the global array
+ * @param {String} - The API endpoint
+ * @param {object} - The JSON printer command to send
+ */
+function sendToPrinter(iPrinterOrdinal, endPoint, objPrinterCommand, callback) {
+    var response =      "";
+    var objPrinter =    globalArrayPrinterProfiles[iPrinterOrdinal];
+    var apiKey =        objPrinter.apiKey;
+    var url =           "http://" + objPrinter.hostName + endPoint;
+
+    console.log(objPrinterCommand);
+    $$.ajaxSetup({ headers: { 'X-Api-Key': apiKey }});
+    $$.ajax({
+        url:         url,
+        method:      'POST',
+        contentType: 'application/json',
+        data:        JSON.stringify(objPrinterCommand),
+        success: function(response){
+            if (typeof callback === "function") {
+                callback('Status 204');
+            }    
+        },
+        error: function(xhr, status){
+            if (typeof callback === "function") {
+                callback(JSON.stringify(status));
+            }
+        }
+    });
+};
 
 // Upon clicking the left panel's video link, toggle visibility... and then back
 $$('.gettingStartedVideos').on('click', function () {
@@ -310,6 +341,8 @@ myApp.onPageInit('printer01', function (page) {
     var printerIpAddress =        "";
     var printerApiKey =           "";
     var printerSelectedFilament = "";
+    var selectedJogAmount =       "";
+    var selectedMotor =           "";
     // Also, we need to push the printer's name to the top of each landing page
     globalArrayPrinterProfiles.forEach(function (objItem) {
         if (objItem.appLandingPage === page.name) {
@@ -323,12 +356,13 @@ myApp.onPageInit('printer01', function (page) {
     });
     // TODO verify that this works with the printer on
     //const printerHostName = printerName + ".local"; //"10.20.30.64"; //"169.254.49.14";
-    const apiKeyAddon = "apikey=" + printerApiKey;
-    var url = "";
-    var htmlContent = "";
+    const apiKeyAddon =        "apikey=" + printerApiKey;
+    var url =                  "";
+    var htmlContent =          "";
     var operationalPrinter01 = false;
-    var printingPrinter01 = false;
-    var pausedPrinter01 = false;
+    var printingPrinter01 =    false;
+    var pausedPrinter01 =      false;
+    var printerOrdinal =       (parseInt(page.name[page.name.length - 1])) - 1;
 
     /* ----------------------------------------------------------------------
        Motors
@@ -340,28 +374,30 @@ myApp.onPageInit('printer01', function (page) {
         /* ------------------------------------------------------------------
            Jog amounts
         ---------------------------------------------------------------------*/
+        if (selectedJogAmount == "") selectedJogAmount = "1mm";
         var amounts = [
             { 'name': '0.1mm', 'color': 'button-gray' },
-            { 'name': '1mm', 'color': 'button-blue' },
-            { 'name': '10mm', 'color': 'button-gray' },
+            { 'name': '1mm',   'color': 'button-blue' },
+            { 'name': '10mm',  'color': 'button-gray' },
             { 'name': '100mm', 'color': 'button-gray' }
         ];
         amounts.forEach(function (item) {
-            htmlContent += '<div class="button-jog ' + item.color + '">' +
+            htmlContent += '<div id="idMotorControlJog' + item.name.replace(/\./g, '') + '" class="button-jog ' + item.color + '">' +
                 item.name + '</div>';
         });
 
         /* ------------------------------------------------------------------
            Motor selection
         ---------------------------------------------------------------------*/
+        if (selectedMotor == "") selectedMotor = "X-Axis";
         var motors = [
-            { 'name': 'X-Axis', 'color': 'button-blue', 'isSelected': true },
-            { 'name': 'Y-Axis', 'color': 'button-gray', 'isSelected': false },
-            { 'name': 'Z-Axis', 'color': 'button-gray', 'isSelected': false },
+            { 'name': 'X-Axis',   'color': 'button-blue', 'isSelected': true },
+            { 'name': 'Y-Axis',   'color': 'button-gray', 'isSelected': false },
+            { 'name': 'Z-Axis',   'color': 'button-gray', 'isSelected': false },
             { 'name': 'Extruder', 'color': 'button-gray', 'isSelected': false }
         ];
         motors.forEach(function (item) {
-            htmlContent += '<div class="button-motors ' + item.color + '">' +
+            htmlContent += '<div id="idMotorControl' + item.name + '" class="button-motors ' + item.color + '">' +
                 item.name + '</div>';
         });
 
@@ -369,19 +405,248 @@ myApp.onPageInit('printer01', function (page) {
         /* ------------------------------------------------------------------
            Actions
         ---------------------------------------------------------------------*/
-        // if (motors[{name='X-Axis'}].isSelected) {
         var directions = [
-            { 'name': 'Left' },
-            { 'name': 'Home' },
-            { 'name': 'Right' }
+            { 'name': 'Left',     'display': 'inline-block' },
+            { 'name': 'Back',     'display': 'none' },
+            { 'name': 'Up',       'display': 'none' },
+            { 'name': 'Extrude',  'display': 'none' },
+            { 'name': 'Home',     'display': 'inline-block' },
+            { 'name': 'Right',    'display': 'inline-block' },
+            { 'name': 'Front',    'display': 'none' },
+            { 'name': 'Down',     'display': 'none' },
+            { 'name': 'Retract',  'display': 'none' }
         ];
         directions.forEach(function (item) {
-            htmlContent += '<div class="button-action button-blue">' +
+            htmlContent += '<div id="idMotorControl' + item.name + '" class="button-action button-blue" ' +
+                'style="display:' + item.display + '"' +
+                '>' +
                 item.name + '</div>';
         });
-        // }
-
         $$("#idMotorsDetail").html(htmlContent);
+
+        $$('#idMotorControlHome').on('click', function () {
+            // myApp.alert('You pressed the Home button');
+            // /api/printer/printhead
+            // { "command": "home", "axes": ["x", "y", "z"] }
+            var endPoint = "/api/printer/printhead";
+            var objPrinterCommand = { "command": "home", "axes": ["x","y","z"] };
+            sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){
+                console.log('Home command sent to printer: ' + data);
+            });
+        });
+        $$('#idMotorControlLeft').on('click', function () {
+            //myApp.alert('You pressed the Left button');
+            // api/printer/printhead
+            // { "command": "jog", "x": jogAmount }
+            var jogAmount = -1 * parseFloat(selectedJogAmount.replace(/m/g, ''));
+            //myApp.alert(jogAmount);
+            var endPoint = "/api/printer/printhead";
+            var objPrinterCommand = { "command": "jog", "x": jogAmount };
+            sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){
+                console.log('Left command sent to printer: ' + data);
+            });
+        });
+        $$('#idMotorControlRight').on('click', function () {
+            //myApp.alert('You pressed the Right button');
+            // api/printer/printhead
+            // { "command": "jog", "x": jogAmount }
+            var jogAmount = parseFloat(selectedJogAmount.replace(/m/g, ''));
+            //myApp.alert(jogAmount);
+            var endPoint = "/api/printer/printhead";
+            var objPrinterCommand = { "command": "jog", "x": jogAmount };
+            sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){
+                console.log('Right command sent to printer: ' + data);
+            });
+        });
+        $$('#idMotorControlBack').on('click', function () {
+            //myApp.alert('You pressed the Back button');
+            // api/printer/printhead
+            // { "command": "jog", "y": jogAmount }
+            var jogAmount = parseFloat(selectedJogAmount.replace(/m/g, ''));
+            //myApp.alert(jogAmount);
+            var endPoint = "/api/printer/printhead";
+            var objPrinterCommand = { "command": "jog", "y": jogAmount };
+            sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){
+                console.log('Back command sent to printer: ' + data);
+            });
+        });
+        $$('#idMotorControlFront').on('click', function () {
+            //myApp.alert('You pressed the Front button');
+            // api/printer/printhead
+            // { "command": "jog", "y": jogAmount }
+            var jogAmount = -1 * parseFloat(selectedJogAmount.replace(/m/g, ''));
+            //myApp.alert(jogAmount);
+            var endPoint = "/api/printer/printhead";
+            var objPrinterCommand = { "command": "jog", "y": jogAmount };
+            sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){
+                console.log('Front command sent to printer: ' + data);
+            });
+        });
+        $$('#idMotorControlUp').on('click', function () {
+            //myApp.alert('You pressed the Up button');
+            // api/printer/printhead
+            // { "command": "jog", "z": jogAmount }
+            var jogAmount = -1 * parseFloat(selectedJogAmount.replace(/m/g, ''));
+            //myApp.alert(jogAmount);
+            var endPoint = "/api/printer/printhead";
+            var objPrinterCommand = { "command": "jog", "z": jogAmount };
+            sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){
+                console.log('Up command sent to printer: ' + data);
+            });
+        });
+        $$('#idMotorControlDown').on('click', function () {
+            //myApp.alert('You pressed the Down button');
+            // api/printer/printhead
+            // { "command": "jog", "z": jogAmount }
+            var jogAmount = parseFloat(selectedJogAmount.replace(/m/g, ''));
+            //myApp.alert(jogAmount);
+            var endPoint = "/api/printer/printhead";
+            var objPrinterCommand = { "command": "jog", "z": jogAmount };
+            sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){
+                console.log('Down command sent to printer: ' + data);
+            });
+        });
+        $$('#idMotorControlExtrude').on('click', function () {
+            //myApp.alert('You pressed the Extrude button');
+            // api/printer/tool
+            // { "command": "select", "tool": "tool0" }
+            // { "command": "extrude", "amount": jogAmount }
+            var jogAmount = parseFloat(selectedJogAmount.replace(/m/g, ''));
+            //myApp.alert(jogAmount);
+            var endPoint = "/api/printer/tool";
+            var objPrinterCommand = { "command": "select", "tool": "tool0" };
+            sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){
+                objPrinterCommand = { "command": "extrude", "amount": jogAmount };
+                sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){                    
+                    console.log('Extrude command sent to printer: ' + data);
+                });
+            });
+        });
+        $$('#idMotorControlRetract').on('click', function () {
+            //myApp.alert('You pressed the Retract button');
+            // api/printer/tool
+            // { "command": "select", "tool": "tool0" }
+            // { "command": "extrude", "amount": jogAmount }
+            var jogAmount = -1 * parseFloat(selectedJogAmount.replace(/m/g, ''));
+            //myApp.alert(jogAmount);
+            var endPoint = "/api/printer/tool";
+            var objPrinterCommand = { "command": "select", "tool": "tool0" };
+            sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){
+                objPrinterCommand = { "command": "extrude", "amount": jogAmount };
+                sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){                    
+                    console.log('Retract command sent to printer: ' + data);
+                });
+            });
+        });
+        $$('#idMotorControlX-Axis').on('click', function () {
+            // TODO change directional buttons, as appropriate
+            //myApp.alert('You pressed the X-Axis button');
+            selectedMotor = "X-Axis";
+            // Toggle motor-select colors
+            document.getElementById('idMotorControlX-Axis').className =   "button-motors button-blue";
+            document.getElementById('idMotorControlY-Axis').className =   "button-motors button-gray";
+            document.getElementById('idMotorControlZ-Axis').className =   "button-motors button-gray";
+            document.getElementById('idMotorControlExtruder').className = "button-motors button-gray";
+            // Change motor-direction buttons
+            document.getElementById('idMotorControlBack').style.display =     "none";
+            document.getElementById('idMotorControlUp').style.display =       "none";
+            document.getElementById('idMotorControlExtrude').style.display =  "none";
+            document.getElementById('idMotorControlLeft').style.display =     "inline-block";
+            document.getElementById('idMotorControlFront').style.display =    "none";
+            document.getElementById('idMotorControlDown').style.display =     "none";
+            document.getElementById('idMotorControlRetract').style.display =  "none";
+            document.getElementById('idMotorControlRight').style.display =    "inline-block";
+        });
+        $$('#idMotorControlY-Axis').on('click', function () {
+            // TODO change directional buttons, as appropriate
+            //myApp.alert('You pressed the Y-Axis button');
+            selectedMotor = "Y-Axis";
+            // Toggle motor-select colors
+            document.getElementById('idMotorControlX-Axis').className =   "button-motors button-gray";
+            document.getElementById('idMotorControlY-Axis').className =   "button-motors button-blue";
+            document.getElementById('idMotorControlZ-Axis').className =   "button-motors button-gray";
+            document.getElementById('idMotorControlExtruder').className = "button-motors button-gray";
+            // Change motor-direction buttons
+            document.getElementById('idMotorControlLeft').style.display =     "none";
+            document.getElementById('idMotorControlUp').style.display =       "none";
+            document.getElementById('idMotorControlExtrude').style.display =  "none";
+            document.getElementById('idMotorControlBack').style.display =     "inline-block";
+            document.getElementById('idMotorControlRight').style.display =    "none";
+            document.getElementById('idMotorControlDown').style.display =     "none";
+            document.getElementById('idMotorControlRetract').style.display =  "none";
+            document.getElementById('idMotorControlFront').style.display =    "inline-block";
+        });
+        $$('#idMotorControlZ-Axis').on('click', function () {
+            // TODO change directional buttons, as appropriate
+            //myApp.alert('You pressed the Z-Axis button');
+            selectedMotor = "Z-Axis";
+            // Toggle motor-select colors
+            document.getElementById('idMotorControlX-Axis').className =   "button-motors button-gray";
+            document.getElementById('idMotorControlY-Axis').className =   "button-motors button-gray";
+            document.getElementById('idMotorControlZ-Axis').className =   "button-motors button-blue";
+            document.getElementById('idMotorControlExtruder').className = "button-motors button-gray";
+            // Change motor-direction buttons
+            document.getElementById('idMotorControlLeft').style.display =     "none";
+            document.getElementById('idMotorControlBack').style.display =     "none";
+            document.getElementById('idMotorControlExtrude').style.display =  "none";
+            document.getElementById('idMotorControlUp').style.display =       "inline-block";
+            document.getElementById('idMotorControlRight').style.display =    "none";
+            document.getElementById('idMotorControlFront').style.display =    "none";
+            document.getElementById('idMotorControlRetract').style.display =  "none";
+            document.getElementById('idMotorControlDown').style.display =     "inline-block";
+        });
+        $$('#idMotorControlExtruder').on('click', function () {
+            // TODO prevent this until the temperature is right
+            // TODO change directional buttons, as appropriate
+            //myApp.alert('You pressed the Extruder button');
+            selectedMotor = "Extruder";
+            // Toggle motor-select colors
+            document.getElementById('idMotorControlX-Axis').className =   "button-motors button-gray";
+            document.getElementById('idMotorControlY-Axis').className =   "button-motors button-gray";
+            document.getElementById('idMotorControlZ-Axis').className =   "button-motors button-gray";
+            document.getElementById('idMotorControlExtruder').className = "button-motors button-blue";
+            // Change motor-direction buttons
+            document.getElementById('idMotorControlLeft').style.display =     "none";
+            document.getElementById('idMotorControlBack').style.display =     "none";
+            document.getElementById('idMotorControlUp').style.display =       "none";
+            document.getElementById('idMotorControlExtrude').style.display =  "inline-block";
+            document.getElementById('idMotorControlRight').style.display =    "none";
+            document.getElementById('idMotorControlFront').style.display =    "none";
+            document.getElementById('idMotorControlDown').style.display =     "none";
+            document.getElementById('idMotorControlRetract').style.display =  "inline-block";
+        });
+        $$('#idMotorControlJog01mm').on('click', function () {
+            //myApp.alert('You pressed the Jog 0.1mm button');
+            selectedJogAmount = "0.1mm";
+            document.getElementById('idMotorControlJog01mm').className =  "button-jog button-blue";
+            document.getElementById('idMotorControlJog1mm').className =   "button-jog button-gray";
+            document.getElementById('idMotorControlJog10mm').className =  "button-jog button-gray";
+            document.getElementById('idMotorControlJog100mm').className = "button-jog button-gray";
+        });
+        $$('#idMotorControlJog1mm').on('click', function () {
+            //myApp.alert('You pressed the Jog 1mm button');
+            selectedJogAmount = "1mm";
+            document.getElementById('idMotorControlJog01mm').className =  "button-jog button-gray";
+            document.getElementById('idMotorControlJog1mm').className =   "button-jog button-blue";
+            document.getElementById('idMotorControlJog10mm').className =  "button-jog button-gray";
+            document.getElementById('idMotorControlJog100mm').className = "button-jog button-gray";
+        });
+        $$('#idMotorControlJog10mm').on('click', function () {
+            //myApp.alert('You pressed the Jog 10mm button');
+            selectedJogAmount = "10mm";
+            document.getElementById('idMotorControlJog01mm').className =  "button-jog button-gray";
+            document.getElementById('idMotorControlJog1mm').className =   "button-jog button-gray";
+            document.getElementById('idMotorControlJog10mm').className =  "button-jog button-blue";
+            document.getElementById('idMotorControlJog100mm').className = "button-jog button-gray";
+        });
+        $$('#idMotorControlJog100mm').on('click', function () {
+            //myApp.alert('You pressed the Jog 100mm button');
+            selectedJogAmount = "100mm";
+            document.getElementById('idMotorControlJog01mm').className =  "button-jog button-gray";
+            document.getElementById('idMotorControlJog1mm').className =   "button-jog button-gray";
+            document.getElementById('idMotorControlJog10mm').className =  "button-jog button-gray";
+            document.getElementById('idMotorControlJog100mm').className = "button-jog button-blue";
+        });
     }
     /* ----------------------------------------------------------------------
        End of Motors
