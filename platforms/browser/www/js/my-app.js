@@ -1,4 +1,4 @@
-var Version = "1.0.8";
+var Version = "1.1.1";
 
 // Here, we're using one 'pageInit' event handler for all pages and selecting one
 // that might need extra initialization. This is a special case in that the home
@@ -160,7 +160,7 @@ function addPrinterProfile(objIncomingPrinterProfile) {
         //       'webcamUrl': 'http://charming-pascal.local:8080/?action=stream'
         //       'selectedFilament': 'PLA' }}
         objArrayExistingPrinterProfiles.PrinterProfiles.push(objIncomingPrinterProfile);
-        myApp.alert(JSON.stringify(objArrayExistingPrinterProfiles));
+        //myApp.alert(JSON.stringify(objArrayExistingPrinterProfiles));
         // Now convert the object into a json string for saving back to storage
         var jsonStringNewPrinterProfiles = JSON.stringify(objArrayExistingPrinterProfiles);
         // Finally, save it back to local storage
@@ -344,6 +344,7 @@ myApp.onPageInit('printer01', function (page) {
     var selectedJogAmount =       "";
     var selectedMotor =           "";
     var selectedHeatingElement =  "tool0";
+    var isWebcamON =              false;
     // Also, we need to push the printer's name to the top of each landing page
     globalArrayPrinterProfiles.forEach(function (objItem) {
         if (objItem.appLandingPage === page.name) {
@@ -842,6 +843,60 @@ myApp.onPageInit('printer01', function (page) {
     -------------------------------------------------------------------------*/
 
     /* ----------------------------------------------------------------------
+       Webcam
+    -------------------------------------------------------------------------*/
+    // TODO Would be nice to know if the stream is on before assuming otherwise
+    {
+        htmlContent = '<p></p>';
+        htmlContent += '<div ' +
+            '" id="idWebcamOn" ' +
+            'class="button-webcam button-blue">' +
+            'Turn On Webcam</div>';
+        htmlContent += '<div ' +
+            'style="display:none" ' +
+            '" id="idWebcamOff" ' +
+            'class="button-webcam button-red">' +
+            'Turn Off Webcam</div>';
+        htmlContent += '<p></p>';
+        $$("#idWebcamDetail").html(htmlContent);
+    
+        $$('#idWebcamOn').on('click', function () {
+            document.getElementById('idWebcamOff').style.display = 'block';
+            document.getElementById('idWebcamOn').style.display =  'none';
+            // POST /api/system/commands/(string: source)/(string: action)
+            // POST /api/system/commands/custom/streamon
+            var endPoint = "/api/system/commands/custom/streamon";
+            var objPrinterCommand = {};
+            sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){
+                console.log('Stream ON command sent to printer: ' + data);
+                isWebcamON = true;
+                document.getElementById('idBackgroundImg').style.display = 'none';
+                document.getElementById('idWebcamImg').style.display = 'block';
+                document.getElementById('idWebcamImg').style.backgroundImage = "url('http://charming-pascal.local:8080/?action=stream')";
+                document.getElementById('idIndexPagePrinterContainer').className = 'page-content after-webcam';
+            });
+        });
+        $$('#idWebcamOff').on('click', function () {
+            document.getElementById('idWebcamOn').style.display =  'block';
+            document.getElementById('idWebcamOff').style.display = 'none';
+            // POST /api/system/commands/custom/streamoff
+            var endPoint = "/api/system/commands/custom/streamoff";
+            var objPrinterCommand = {};
+            sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){
+                console.log('Stream OFF command sent to printer: ' + data);
+                isWebcamON = false;
+                document.getElementById('idBackgroundImg').style.display = 'block';
+                document.getElementById('idWebcamImg').style.display = 'none';
+                document.getElementById('idWebcamImg').style.backgroundImage = "url('../img/c2-r2-header.jpg')";
+                document.getElementById('idIndexPagePrinterContainer').className = 'page-content after-background';
+            });
+        });
+    }
+    /* ----------------------------------------------------------------------
+       End of Webcam
+    -------------------------------------------------------------------------*/
+
+    /* ----------------------------------------------------------------------
        Files
     -------------------------------------------------------------------------*/
     url = "http://" + printerHostName + "/api/files?recursive=true&" + apiKeyAddon;
@@ -852,29 +907,37 @@ myApp.onPageInit('printer01', function (page) {
         // 3) robo_data.time.hours, robo_data.time.minutes,
         htmlContent = '<p></p>';
         // Walk the array first, looking for folders
-        for (var i = 0, len = jsonData.files.length; i < len; i++) {
-            var iconType = 'folder';
-            var buttonColor = 'button-green';
-            if (jsonData.files[i].type_path) {
-                htmlContent += '<div ' +
-                    'style="color:white;font-weight:bolder;font-size:12pt;font-family: Arial, Helvetica, sans-serif;border-radius:5px;padding:5px;margin-bottom:5px;' +
-                    '" class="button-file ' + buttonColor + '">' +
-                    '<img class="img-file ' + buttonColor + '" src="/img/' + iconType + '_48x48.png" width="48" height="48"/>' +
-                    '<span style="position:relative;top:3px;">' + jsonData.files[i].name + '</span></div>';
-            }
-        }
+        // for (var i = 0, len = jsonData.files.length; i < len; i++) {
+        //     var iconType = 'folder';
+        //     var buttonColor = 'button-green';
+        //     if (jsonData.files[i].type_path) {
+        //         htmlContent += '<div ' +
+        //             'style="color:white;font-weight:bolder;font-size:12pt;font-family: Arial, Helvetica, sans-serif;border-radius:5px;padding:5px;margin-bottom:5px;' +
+        //             '" class="button-file ' + buttonColor + '">' +
+        //             '<img class="img-file ' + buttonColor + '" src="/img/' + iconType + '_48x48.png" width="48" height="48"/>' +
+        //             '<span style="position:relative;top:3px;">' + jsonData.files[i].name + '</span></div>';
+        //     }
+        // }
         // Walk the array a second time, looking for just files
         for (var i = 0, len = jsonData.files.length; i < len; i++) {
+            console.log('Files section inside getJSON inside second for loop with: ' + i);
             var iconType = 'images';
             var buttonColor = 'button-blue';
+            var hours = 0;
+            var minutes = 0;
             if (!jsonData.files[i].type_path) {
-                var hours = jsonData.files[i].robo_data.time.hours;
-                var minutes = pad(jsonData.files[i].robo_data.time.minutes);
+                if (jsonData.files[i].robo_data) {
+                    hours = jsonData.files[i].robo_data.time.hours;
+                    minutes = pad(jsonData.files[i].robo_data.time.minutes);
+                }
                 htmlContent += '<div ' +
                     'style="color:white;font-weight:bolder;font-size:12pt;font-family: Arial, Helvetica, sans-serif;border-radius:5px;padding:5px;margin-bottom:5px;' +
                     '" class="button-file ' + buttonColor + '">' +
                     '<img class="img-file ' + buttonColor + '" src="/img/' + iconType + '_48x48.png" width="48" height="48"/>' +
-                    '<span style="position:relative;top:3px;">' + jsonData.files[i].name + ' (' + hours + ':' + minutes + ')' + '</span></div>';
+                    '<span style="position:relative;top:3px;">' + jsonData.files[i].name +
+                        // Ignore if it's never been printed
+                        ((hours == 0 && minutes == 0) ? '' : ' (' + hours + ':' + minutes + ')') +
+                        '</span></div>';
             }
         }
         htmlContent += '<p></p>';

@@ -110,6 +110,9 @@ p {
 .button-gray {
     background-color: #a8a8a8;
 }
+.button-red {
+    background-color: #bf3b1c;    
+}
 .background-gray {
     background-color: #eeeeee;
 }
@@ -131,8 +134,18 @@ p {
     position: absolute;
     -webkit-filter: blur(3px);
 }
+.webcamimg {
+    height: 100%;
+    width: 100%;
+    background: url('../img/c2-r2-header.jpg');
+    background-size: cover;
+    position: absolute;
+}
 .after-background {
     margin-top: 320px;
+}
+.after-webcam {
+    margin-top: 0px;
 }
 .button-file .img-file {
     display: inline-block;
@@ -276,4 +289,53 @@ a.item-content.item-link.a-button-addprinter {
     margin-bottom: 12px;
     text-align: center;
     height: 50px;
+}
+.button-webcam {
+    margin-right: 5px;
+    display: inline-block;
+    width: 100%;
+    color: white;
+    font-size: 14pt;
+    font-family: Arial, Helvetica, sans-serif;
+    border-radius: 5px;
+    padding: 5px;
+    padding-top: 25px;
+    padding-left: 0px;
+    margin-top: 10px;
+    margin-bottom: 12px;
+    text-align: center;
+    height: 50px;
+}
+
+/* ---------------------------------------------------------------------------- */
+/* Apple Safari Portrait 768x10024 - iPad II
+   !!! Reverses height as width in landscape !!! */
+/* ---------------------------------------------------------------------------- */
+@media all and (device-width: 768px) and (device-height: 1024px) and (orientation: portrait) {
+    .backgroundimg {
+        height: 50%;
+        width: 100%;
+    }
+    .webcamimg {
+        height: 75%;
+        width: 100%;
+    }
+    
+}
+/* ---------------------------------------------------------------------------- */
+/* iPhone 5 Portrait 320x568 - Android Alcatel onetouch 320x534 */
+/* ---------------------------------------------------------------------------- */
+/*@media all and (min-width: 0) and (max-width: 320px) and (orientation: portrait) {
+    .webcamimg {
+        height: 75%;
+        width: 100%;
+    }
+} */  
+/* ---------------------------------------------------------------------------- */
+/* iPhone 5 Landscape 568x320 - Android Alcatel onetouch 320x534 */
+/* ---------------------------------------------------------------------------- */
+@media all and (min-width: 0) and (width: 568px) and (orientation: landscape) {
+    .after-background {
+        margin-top: 80px;
+    }
 }

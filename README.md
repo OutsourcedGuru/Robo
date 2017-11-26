@@ -43,7 +43,7 @@ I'm now pulling data by querying the underlying [OctoPrint API](http://docs.octo
 - [ ] Change settings via API interface
 - [x] Jog motor/extruder via API interface
 - [ ] Initiate job from interface
-- [ ] Start video feed (landing page) and show (home page)
+- [x] Start video feed (landing page) and show (home page)
 - [x] Save the currently-selected filament type in local storage
 - [ ] Add buttons for other tools
 - [ ] Add safety mechanism for jogging the extruder versus the temperature
@@ -52,6 +52,7 @@ I'm now pulling data by querying the underlying [OctoPrint API](http://docs.octo
 - [ ] Filament wizard
 - [ ] Change filament wizard
 - [ ] Testing with iOS, Android and Microsoft Phone mobile platforms as well as OS X, Windows 10 and Ubuntu 16.04 LTS workstations.
+- [x] Update @media queries for iPhone/iPad
 
 Comments/questions?  [info@robo.fyi](mailto:info@robo.fyi)
 
