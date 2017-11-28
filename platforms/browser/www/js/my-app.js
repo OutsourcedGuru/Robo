@@ -1,11 +1,13 @@
-var Version = "1.1.2";
+var Version = "1.2.1";
 
 // Here, we're using one 'pageInit' event handler for all pages and selecting one
 // that might need extra initialization. This is a special case in that the home
 // page isn't reached from the Framework7 navigation handler so it won't be fired
 // off in the standard version as seen below for other page initializers.
 var globalArrayPrinterProfiles = [];
-var globalCurrentPrinterName = "";
+var globalCurrentPrinterName =   "";
+var isWebcamON =                 false;
+
 document.addEventListener('pageInit', function (e) {
     // Get page data from event data
     var page = e.detail.page;
@@ -30,7 +32,6 @@ document.addEventListener('pageInit', function (e) {
             var landingPage = 'printer0' + ordinalLandingPage++;
             var objPrinterState = new PrinterState(itemKey,
                 item[itemKey].hostName,
-                item[itemKey].ipAddress,
                 item[itemKey].apiKey,
                 item[itemKey].webcamUrl,
                 item[itemKey].selectedFilament,
@@ -55,32 +56,84 @@ document.addEventListener('pageInit', function (e) {
                                     </li>
         */
         var htmlContent = "<ul>";
+        //console.log(globalArrayPrinterProfiles);
         if (globalArrayPrinterProfiles.length) {
             globalArrayPrinterProfiles.forEach(function (objItem) {
-                // console.log(objItem.name);
+                //console.log(objItem.name);
                 // TODO (make this work for more than one printer by determining the page ordinal)
-                htmlContent += '<li class="background-gray" style="color:red">' +
-                    '<a href="printeroffline.html" class="item-content item-link">' +
-                    '<div class="item-inner">' +
-                    '&bull; ' + objItem.name +
-                    '</div></a></li>';
-                // htmlContent += '<li class="background-gray">' +
-                //     '<a href="#" class="item-content item-link">' +
-                //     '<div class="item-inner">' +
-                //     '<div class="item-title ' + objItem.appLandingPage + '">' +
-                //     '&bull; ' + objItem.name + '</div>' +
-                //     '</div></a></li>';
-            });
+                // Query the printer and determine if it is in an operational state
+                var url = "http://" + objItem.hostName + "/api/printer";
+                //console.log(url);
+                var printerRequest = new XMLHttpRequest();
+                printerRequest.open("get", url, true);
+                printerRequest.timeout = 5000;  // Set timeout to 5 seconds
+                printerRequest.setRequestHeader('X-Api-Key', objItem.apiKey);
+                printerRequest.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        var jsonData = JSON.parse(this.responseText);
+                        //console.log(jsonData);
+
+                        if (jsonData.state.flags) {
+                            // console.log('jsonData.state.flags');
+                            if (jsonData.state.flags.operational) {
+                                //console.log(objItem.appLandingPage);
+                                htmlContent += '<li class="background-gray">' +
+                                    '<a href="' + objItem.appLandingPage + '.html" class="item-content item-link">' +
+                                    '<div class="item-inner">' +
+                                    '&bull; ' + objItem.name +
+                                    '</div></a></li>';
+                                htmlContent += "</ul>";
+                                document.getElementById('idIndexPagePrinters').innerHTML = htmlContent;
+                                return;
+                            } else {
+                                // It responded but isn't operational
+                                htmlContent += '<li class="background-gray" style="color:red">' +
+                                    '<a href="printeroffline.html" class="item-content item-link">' +
+                                    '<div class="item-inner">' +
+                                    '&bull; ' + objItem.name +
+                                    '</div></a></li>';
+                                htmlContent += "</ul>";
+                                document.getElementById('idIndexPagePrinters').innerHTML = htmlContent;
+                                return;                            
+                            }
+                        } else {
+                            // It did not respond at all
+                            htmlContent += '<li class="background-gray" style="color:red">' +
+                                '<a href="printeroffline.html" class="item-content item-link">' +
+                                '<div class="item-inner">' +
+                                '&bull; ' + objItem.name +
+                                '</div></a></li>';
+                            htmlContent += "</ul>";
+                            document.getElementById('idIndexPagePrinters').innerHTML = htmlContent;
+                            return;
+                        }        
+                    } else {
+                        // Else from if (this.readystate...
+                        //myApp.alert('Could not find printer'); 
+                        // htmlContent += '<li class="background-gray" style="color:red">' +
+                        //     '<a href="printeroffline.html" class="item-content item-link">' +
+                        //     '<div class="item-inner">' +
+                        //     '&bull; ' + objItem.name +
+                        //     '</div></a></li>';
+                        // htmlContent += "</ul>";
+                        // document.getElementById('idIndexPagePrinters').innerHTML = htmlContent;
+                        // return;
+                    }   // End of if (this.readystate...
+                };  // End of xmlhttp.onreadystatechange...
+                printerRequest.send();        
+            }); // End of globalArrayPrinterProfiles.forEach()
         } else {
+            // Else from if (globalArrayPrinterProfiles.length) {
             htmlContent += '<li class="background-gray">' +
                 '<a href="addprinter.html" class="item-content item-link">' +
                 '<div class="item-inner">' +
                 '<div class="item-title addprinter.html">' +
                 'Add a printer</div>' +
                 '</div></a></li>';
-        }
-        htmlContent += "</ul>";
-        document.getElementById('idIndexPagePrinters').innerHTML = htmlContent;
+                htmlContent += "</ul>";
+                document.getElementById('idIndexPagePrinters').innerHTML = htmlContent;
+                return;        
+            }   // End of if (globalArrayPrinterProfiles.length) {
     }
 });
 
@@ -126,7 +179,6 @@ $$(document).on('deviceready', function () {
             {
                 charming-pascal': {
                     'hostName': 'charming-pascal.local',
-                    'ipAddress': '10.20.30.64',
                     'apiKey': 'hexstring',
                     'webcamUrl': 'http://charming-pascal.local:8080/?actin=stream',
                     'selectedFilament': 'PLA'}
@@ -160,7 +212,6 @@ function addPrinterProfile(objIncomingPrinterProfile) {
         // objIncomingPrinterProfile should look like: 
         // { 'charming-pascal': 
         //     { 'hostName': 'charming-pascal.local',
-        //       'ipAddress': '10.20.30.64',
         //       'apiKey': 'hexstring',
         //       'webcamUrl': 'http://charming-pascal.local:8080/?action=stream'
         //       'selectedFilament': 'PLA' }}
@@ -205,7 +256,7 @@ function sendToPrinter(iPrinterOrdinal, endPoint, objPrinterCommand, callback) {
     var apiKey =        objPrinter.apiKey;
     var url =           "http://" + objPrinter.hostName + endPoint;
 
-    console.log(objPrinterCommand);
+    //console.log(objPrinterCommand);
     $$.ajaxSetup({ headers: { 'X-Api-Key': apiKey }});
     $$.ajax({
         url:         url,
@@ -273,16 +324,22 @@ myApp.onPageInit('reportissue', function (page) {
 // Here, we're using a page callback for the deleteprinter page:
 myApp.onPageInit('deleteprinter', function (page) {
     $$('#idDeletePrinterBackLink').on('click', function () {
+        localStorage.clear();
+        // Let's save an empty array in its place
+        var objEmptyArrayPrinterProfiles = { 'PrinterProfiles': [] };
+        // Now convert this into a json string        
+        var jsonStringEmptyArrayPrinterProfiles = JSON.stringify(objEmptyArrayPrinterProfiles);
+        // Finally, save it to local storage
+        localStorage.setItem('arrayPrinterProfiles', jsonStringEmptyArrayPrinterProfiles);
         mainView.router.loadPage("/");
     });
-    localStorage.clear();
 });
 
 // Here, we're using a page callback for the addprinter page:
 myApp.onPageInit('addprinter', function (page) {
-    console.log('Initializing addprinter...');
+    //console.log('Initializing addprinter...');
     $$('#idSaveButtonAddPrinter').on('click', function () {
-        console.log('Save Button clicked');
+        //console.log('Save Button clicked');
         // First, retrieve the existing jsonString of the array from local storage
         var jsonStringAddPrinter = localStorage.getItem('f7form-idAddPrinterForm');
         // Then, convert it back into a json object (array)
@@ -291,7 +348,6 @@ myApp.onPageInit('addprinter', function (page) {
         /*
         { "charming-pascal":
             { "hostName": "charming-pascal.local",
-              "ipAddress": "10.20.30.64",
               "apiKey": "hexstring",
               "webcamUrl": "http://charming-pascal.local:8080/?action=stream",
               "selectedFilament": "PLA" }}        
@@ -300,7 +356,7 @@ myApp.onPageInit('addprinter', function (page) {
             objAddPrinter.addPrinterDisplayName +
             '": { "hostName": "' +
             objAddPrinter.addPrinterHostName +
-            '", "ipAddress": "10.20.30.64", "apiKey": "' +
+            '", "apiKey": "' +
             objAddPrinter.addPrinterApiKey +
             '", "webcamUrl": "' +
             objAddPrinter.addPrinterWebcamUrl +
@@ -343,26 +399,21 @@ $$('.printer01').on('click', function () {
 myApp.onPageInit('printer01', function (page) {
     var printerName =             "";
     var printerHostName =         "";
-    var printerIpAddress =        "";
     var printerApiKey =           "";
     var printerSelectedFilament = "";
     var selectedJogAmount =       "";
     var selectedMotor =           "";
     var selectedHeatingElement =  "tool0";
-    var isWebcamON =              false;
     // Also, we need to push the printer's name to the top of each landing page
     globalArrayPrinterProfiles.forEach(function (objItem) {
         if (objItem.appLandingPage === page.name) {
             printerName =             objItem.name;
             printerHostName =         objItem.hostName;
-            printerIpAddress =        objItem.ipAddress;
             printerApiKey =           objItem.apiKey;
             printerSelectedFilament = objItem.selectedFilament;
             $$("#idPrinterTitle").html(objItem.name);
         }
     });
-    // TODO verify that this works with the printer on
-    //const printerHostName = printerName + ".local"; //"10.20.30.64"; //"169.254.49.14";
     const apiKeyAddon =        "apikey=" + printerApiKey;
     var url =                  "";
     var htmlContent =          "";
@@ -438,7 +489,7 @@ myApp.onPageInit('printer01', function (page) {
             var endPoint = "/api/printer/printhead";
             var objPrinterCommand = { "command": "home", "axes": ["x","y","z"] };
             sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){
-                console.log('Home command sent to printer: ' + data);
+                //console.log('Home command sent to printer: ' + data);
             });
         });
         $$('#idMotorControlLeft').on('click', function () {
@@ -450,7 +501,7 @@ myApp.onPageInit('printer01', function (page) {
             var endPoint = "/api/printer/printhead";
             var objPrinterCommand = { "command": "jog", "x": jogAmount };
             sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){
-                console.log('Left command sent to printer: ' + data);
+                //console.log('Left command sent to printer: ' + data);
             });
         });
         $$('#idMotorControlRight').on('click', function () {
@@ -462,7 +513,7 @@ myApp.onPageInit('printer01', function (page) {
             var endPoint = "/api/printer/printhead";
             var objPrinterCommand = { "command": "jog", "x": jogAmount };
             sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){
-                console.log('Right command sent to printer: ' + data);
+                //console.log('Right command sent to printer: ' + data);
             });
         });
         $$('#idMotorControlBack').on('click', function () {
@@ -474,7 +525,7 @@ myApp.onPageInit('printer01', function (page) {
             var endPoint = "/api/printer/printhead";
             var objPrinterCommand = { "command": "jog", "y": jogAmount };
             sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){
-                console.log('Back command sent to printer: ' + data);
+                //console.log('Back command sent to printer: ' + data);
             });
         });
         $$('#idMotorControlFront').on('click', function () {
@@ -486,7 +537,7 @@ myApp.onPageInit('printer01', function (page) {
             var endPoint = "/api/printer/printhead";
             var objPrinterCommand = { "command": "jog", "y": jogAmount };
             sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){
-                console.log('Front command sent to printer: ' + data);
+                //console.log('Front command sent to printer: ' + data);
             });
         });
         $$('#idMotorControlUp').on('click', function () {
@@ -498,7 +549,7 @@ myApp.onPageInit('printer01', function (page) {
             var endPoint = "/api/printer/printhead";
             var objPrinterCommand = { "command": "jog", "z": jogAmount };
             sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){
-                console.log('Up command sent to printer: ' + data);
+                //console.log('Up command sent to printer: ' + data);
             });
         });
         $$('#idMotorControlDown').on('click', function () {
@@ -510,7 +561,7 @@ myApp.onPageInit('printer01', function (page) {
             var endPoint = "/api/printer/printhead";
             var objPrinterCommand = { "command": "jog", "z": jogAmount };
             sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){
-                console.log('Down command sent to printer: ' + data);
+                //console.log('Down command sent to printer: ' + data);
             });
         });
         $$('#idMotorControlExtrude').on('click', function () {
@@ -525,7 +576,7 @@ myApp.onPageInit('printer01', function (page) {
             sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){
                 objPrinterCommand = { "command": "extrude", "amount": jogAmount };
                 sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){                    
-                    console.log('Extrude command sent to printer: ' + data);
+                    //console.log('Extrude command sent to printer: ' + data);
                 });
             });
         });
@@ -541,12 +592,11 @@ myApp.onPageInit('printer01', function (page) {
             sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){
                 objPrinterCommand = { "command": "extrude", "amount": jogAmount };
                 sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){                    
-                    console.log('Retract command sent to printer: ' + data);
+                    //console.log('Retract command sent to printer: ' + data);
                 });
             });
         });
         $$('#idMotorControlX-Axis').on('click', function () {
-            // TODO change directional buttons, as appropriate
             //myApp.alert('You pressed the X-Axis button');
             selectedMotor = "X-Axis";
             // Toggle motor-select colors
@@ -565,7 +615,6 @@ myApp.onPageInit('printer01', function (page) {
             document.getElementById('idMotorControlRight').style.display =    "inline-block";
         });
         $$('#idMotorControlY-Axis').on('click', function () {
-            // TODO change directional buttons, as appropriate
             //myApp.alert('You pressed the Y-Axis button');
             selectedMotor = "Y-Axis";
             // Toggle motor-select colors
@@ -584,7 +633,6 @@ myApp.onPageInit('printer01', function (page) {
             document.getElementById('idMotorControlFront').style.display =    "inline-block";
         });
         $$('#idMotorControlZ-Axis').on('click', function () {
-            // TODO change directional buttons, as appropriate
             //myApp.alert('You pressed the Z-Axis button');
             selectedMotor = "Z-Axis";
             // Toggle motor-select colors
@@ -604,7 +652,6 @@ myApp.onPageInit('printer01', function (page) {
         });
         $$('#idMotorControlExtruder').on('click', function () {
             // TODO prevent this until the temperature is right
-            // TODO change directional buttons, as appropriate
             //myApp.alert('You pressed the Extruder button');
             selectedMotor = "Extruder";
             // Toggle motor-select colors
@@ -740,7 +787,7 @@ myApp.onPageInit('printer01', function (page) {
                 selectedHeatingElement + '": ' + tempTarget + '}}');
             // console.log(objPrinterCommand);
             sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){
-                console.log('Preheat command sent to printer: ' + data);
+                //console.log('Preheat command sent to printer: ' + data);
             });
         });
         $$('#idToolCooldown').on('click', function () {
@@ -756,7 +803,7 @@ myApp.onPageInit('printer01', function (page) {
                 selectedHeatingElement + '": ' + tempTarget + '}}');
             // console.log(objPrinterCommand);
             sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){
-                console.log('Cooldown command sent to printer: ' + data);
+                //console.log('Cooldown command sent to printer: ' + data);
             });
         });
     
@@ -850,16 +897,17 @@ myApp.onPageInit('printer01', function (page) {
     /* ----------------------------------------------------------------------
        Webcam
     -------------------------------------------------------------------------*/
-    // TODO Would be nice to know if the stream is on before assuming otherwise
     {
         htmlContent = '<p></p>';
+        // console.log(isWebcamON);
         htmlContent += '<div ' +
-            '" id="idWebcamOn" ' +
+            'style="display:' + ((isWebcamON) ? 'none' : 'inline-block') + '" ' +
+            ' id="idWebcamOn" ' +
             'class="button-webcam button-blue">' +
             'Turn On Webcam</div>';
         htmlContent += '<div ' +
-            'style="display:none" ' +
-            '" id="idWebcamOff" ' +
+            'style="display:' + ((isWebcamON) ? 'inline-block' : 'none') + '" ' +
+            ' id="idWebcamOff" ' +
             'class="button-webcam button-red">' +
             'Turn Off Webcam</div>';
         htmlContent += '<p></p>';
@@ -873,12 +921,16 @@ myApp.onPageInit('printer01', function (page) {
             var endPoint = "/api/system/commands/custom/streamon";
             var objPrinterCommand = {};
             sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){
-                console.log('Stream ON command sent to printer: ' + data);
+                //console.log('Stream ON command sent to printer: ' + data);
                 isWebcamON = true;
                 document.getElementById('idBackgroundImg').style.display = 'none';
                 document.getElementById('idWebcamImg').style.display = 'block';
                 document.getElementById('idWebcamImg').style.backgroundImage = "url('http://charming-pascal.local:8080/?action=stream')";
                 document.getElementById('idIndexPagePrinterContainer').className = 'page-content after-webcam';
+                // This doesn't seem to want to work
+                // setTimeout(function() {
+                //     mainView.router.loadPage("/")},
+                //     15000);
             });
         });
         $$('#idWebcamOff').on('click', function () {
@@ -888,7 +940,7 @@ myApp.onPageInit('printer01', function (page) {
             var endPoint = "/api/system/commands/custom/streamoff";
             var objPrinterCommand = {};
             sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){
-                console.log('Stream OFF command sent to printer: ' + data);
+                //console.log('Stream OFF command sent to printer: ' + data);
                 isWebcamON = false;
                 document.getElementById('idBackgroundImg').style.display = 'block';
                 document.getElementById('idWebcamImg').style.display = 'none';
@@ -905,6 +957,7 @@ myApp.onPageInit('printer01', function (page) {
        Files
     -------------------------------------------------------------------------*/
     url = "http://" + printerHostName + "/api/files?recursive=true&" + apiKeyAddon;
+    var aFiles = [];
     $$.getJSON(url, function (jsonData) {
         // At this point, we have a jsonData object which includes jsonData.files[]
         // as an array of objects:
@@ -925,17 +978,20 @@ myApp.onPageInit('printer01', function (page) {
         // }
         // Walk the array a second time, looking for just files
         for (var i = 0, len = jsonData.files.length; i < len; i++) {
-            console.log('Files section inside getJSON inside second for loop with: ' + i);
-            var iconType = 'images';
-            var buttonColor = 'button-blue';
-            var hours = 0;
-            var minutes = 0;
+            //console.log('Files section inside getJSON inside second for loop with: ' + i);
+            var iconType =              (operationalPrinter01) ? 'images' : 'spacer';
+            var buttonColor =           (operationalPrinter01) ? 'button-blue' : 'button-gray';
+            var hours =                 0;
+            var minutes =               0;
+            var nameWithoutExtension = jsonData.files[i].name.replace(/\./g, '').replace(/gcode/g, '');
             if (!jsonData.files[i].type_path) {
+                aFiles.push(nameWithoutExtension);
                 if (jsonData.files[i].robo_data) {
                     hours = jsonData.files[i].robo_data.time.hours;
                     minutes = pad(jsonData.files[i].robo_data.time.minutes);
                 }
                 htmlContent += '<div ' +
+                    'id="idFileButton' + i + '" ' +
                     'style="color:white;font-weight:bolder;font-size:12pt;font-family: Arial, Helvetica, sans-serif;border-radius:5px;padding:5px;margin-bottom:5px;' +
                     '" class="button-file ' + buttonColor + '">' +
                     '<img class="img-file ' + buttonColor + '" src="/img/' + iconType + '_48x48.png" width="48" height="48"/>' +
@@ -943,30 +999,34 @@ myApp.onPageInit('printer01', function (page) {
                         // Ignore if it's never been printed
                         ((hours == 0 && minutes == 0) ? '' : ' (' + hours + ':' + minutes + ')') +
                         '</span></div>';
-            }
+            }            
         }
         htmlContent += '<p></p>';
         $$("#idFilesDetail").html(htmlContent);
+
+        if (operationalPrinter01) {
+            // Create the button handler events on a per-file-button basis
+            for (var i = 0, len = aFiles.length; i < len; i++) {
+                $$('#idFileButton'+i).on('click', function (e) {
+                    var fileName = e.target.textContent;
+                    // Remove the optional ' (hours:minutes)' at the end
+                    if (fileName[fileName.length - 1] == ')') {
+                        fileName = fileName.substring(0, fileName.indexOf(' ('));
+                    }
+                    // /api/files/(string: location)/(path: path)
+                    // /api/files/local/whistle_v2.gcode
+                    // { "command": "select", "print": true }
+                    var endPoint = "/api/files/local/" + fileName;
+                    var objPrinterCommand = { "command": "select", "print": true };
+                    sendToPrinter(printerOrdinal, endPoint, objPrinterCommand, function(data){
+                        //console.log('Select/print command sent to printer for ' + fileName + ': ' + data);
+                    });
+        
+                });
+            };
+        }            
     });
     /* ----------------------------------------------------------------------
        End of Files
     -------------------------------------------------------------------------*/
 });
-
-
-// Here, we're using one 'pageInit' event handler for all pages and selecting one
-// that might need extra initialization:
-// $$(document).on('pageInit', function (e) {
-//     // Get page data from event data
-//     var page = e.detail.page;
-
-//     if (page.name === 'about') {
-//         //console.log('Global pageInit handler with if statement');
-//         // myApp.alert()
-//     }
-// })
-// Here, we're using live 'pageInit' event handlers for each page
-// $$(document).on('pageInit', '.page[data-page="about"]', function (e) {
-//     // Following code will be executed for page with data-page attribute equal to "about"
-//     //console.log('pageInit with selector for about');
-// })
