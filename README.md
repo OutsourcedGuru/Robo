@@ -40,10 +40,6 @@ For my own printer, I intend to serve up this app with a $10 [Raspberry Pi Zero 
 ## Progress
 The app looks great so far. I've managed to reasonably mimic the original look and feel after the port to PhoneGap/Framework7.
 
-![sidemenu](https://user-images.githubusercontent.com/15971213/32874784-3be51bbc-ca49-11e7-9b26-3c64c638df01.png)
-
-![motors](https://user-images.githubusercontent.com/15971213/32874814-6822c9e0-ca49-11e7-9fb5-5bd20e988246.png)
-
 I'm now pulling data by querying the underlying [OctoPrint API](http://docs.octoprint.org/en/master/api/) which is running in the printer's computer. Work is progressing at a rapid pace and I anticipate that it will be completed soon.
 
 ### To-do
@@ -84,6 +80,40 @@ I'm now pulling data by querying the underlying [OctoPrint API](http://docs.octo
 
 Comments/questions?  [info@robo.fyi](mailto:info@robo.fyi)
 
+## Screenshots
+Here is the latest collection of screenshots from the running app.
+
+![robo-home](https://user-images.githubusercontent.com/15971213/33332680-bec1128c-d419-11e7-97ed-f03b1620272c.png)
+
+![robo-home-webcam](https://user-images.githubusercontent.com/15971213/33332724-dcc35ad8-d419-11e7-9b88-305b2597c707.png)
+
+![robo-leftpanel](https://user-images.githubusercontent.com/15971213/33332752-f507630a-d419-11e7-9cd9-56287b78acf2.png)
+
+![robo-videos](https://user-images.githubusercontent.com/15971213/33332823-22b1a02c-d41a-11e7-85ec-78129527b6b0.png)
+
+![robo-motors](https://user-images.githubusercontent.com/15971213/33332915-5daacb36-d41a-11e7-8d33-e7fe508055d8.png)
+
+![robo-temperature](https://user-images.githubusercontent.com/15971213/33332930-6b5d19f0-d41a-11e7-8df0-b137283c0fa4.png)
+
+![robo-filament](https://user-images.githubusercontent.com/15971213/33332959-7c97c6e8-d41a-11e7-8233-2f28a5a3809c.png)
+
+![robo-webcam-on](https://user-images.githubusercontent.com/15971213/33332991-942525c6-d41a-11e7-8a25-367b3cac8f5f.png)
+
+![robo-webcam-off](https://user-images.githubusercontent.com/15971213/33333015-a4329bec-d41a-11e7-822b-d7f64c0ae044.png)
+
+![robo-files](https://user-images.githubusercontent.com/15971213/33333041-b29a42f2-d41a-11e7-9dfb-8a01849f4122.png)
+
+![robo-printer-help](https://user-images.githubusercontent.com/15971213/33333084-d3584f16-d41a-11e7-82f8-a91d5f3e370c.png)
+
+![robo-addprinter](https://user-images.githubusercontent.com/15971213/33333129-f66ebcb0-d41a-11e7-83ca-aed048c43245.png)
+
+![robo-addprinter-help](https://user-images.githubusercontent.com/15971213/33333149-05e8679a-d41b-11e7-80c7-da53e9bfa3a3.png)
+
+![robo-appsettings](https://user-images.githubusercontent.com/15971213/33333185-1e625dda-d41b-11e7-8816-1f39075972b4.png)
+
+![robo-reportissue](https://user-images.githubusercontent.com/15971213/33333216-34157ba8-d41b-11e7-9f38-0cacfa4c3aee.png)
+
+![robo-about](https://user-images.githubusercontent.com/15971213/33333243-4198efe4-d41b-11e7-99dc-baad461cf964.png)
 
 
   
