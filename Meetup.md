@@ -25,6 +25,8 @@ This requires that you first get developer IDs from [Apple](https://developer.ap
 
 Once done, you may then build these platform-specific versions.
 
+![BuildOption](https://user-images.githubusercontent.com/15971213/33640106-79daf154-d9e3-11e7-8299-e654999aa7ae.png)
+
 ### Host Locally and Use Browser
 The easier method is to simply install the necessary dependencies and to serve up the app locally. You'd then use your browser on your mobile, for example, to visit this hosted site.
 
@@ -40,6 +42,8 @@ $ npm start
 Then, on your mobile phone or your workstation, visit the indicated website in your browser.
 
 For my own printer, I intend to serve up this app with a $10 [Raspberry Pi Zero W](https://www.raspberrypi.org/products/raspberry-pi-zero-w/) single board computer inside the bottom of my printer's case (rather than potentially polluting the OctoPrint installation on the main Pi). It will be powered via microUSB cable from the main Pi computer.
+
+![BuildOption](https://user-images.githubusercontent.com/15971213/33640235-4b949600-d9e4-11e7-962d-e9c3797c929d.png)
 
 ## Progress
 The app looks great so far. I've managed to reasonably mimic the original look and feel after the port to PhoneGap/Framework7.
