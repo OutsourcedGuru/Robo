@@ -1,4 +1,4 @@
-var Version = "1.2.1";
+var Version = "1.2.2";
 
 // Here, we're using one 'pageInit' event handler for all pages and selecting one
 // that might need extra initialization. This is a special case in that the home
@@ -62,7 +62,7 @@ document.addEventListener('pageInit', function (e) {
                 //console.log(objItem.name);
                 // TODO (make this work for more than one printer by determining the page ordinal)
                 // Query the printer and determine if it is in an operational state
-                var url = "http://" + objItem.hostName + "/api/printer";
+                var url = "http://" + objItem.hostName + "/api/printer?apikey=" + objItem.apiKey;
                 //console.log(url);
                 var printerRequest = new XMLHttpRequest();
                 printerRequest.open("get", url, true);
@@ -94,7 +94,7 @@ document.addEventListener('pageInit', function (e) {
                                     '</div></a></li>';
                                 htmlContent += "</ul>";
                                 document.getElementById('idIndexPagePrinters').innerHTML = htmlContent;
-                                return;                            
+                                return;
                             }
                         } else {
                             // It did not respond at all
@@ -106,10 +106,21 @@ document.addEventListener('pageInit', function (e) {
                             htmlContent += "</ul>";
                             document.getElementById('idIndexPagePrinters').innerHTML = htmlContent;
                             return;
-                        }        
+                        }
                     } else {
                         // Else from if (this.readystate...
-                        //myApp.alert('Could not find printer'); 
+                        if (this.readyState == 4 && this.status == 409) {
+                            console.log('Printer returned a 409 error ["' + this.responseText + '"] (potentially okay for a test rig)');
+                            htmlContent += '<li class="background-gray">' +
+                                '<a href="' + objItem.appLandingPage + '.html" class="item-content item-link">' +
+                                '<div class="item-inner">' +
+                                '&bull; ' + objItem.name +
+                                '</div></a></li>';
+                            htmlContent += "</ul>";
+                            document.getElementById('idIndexPagePrinters').innerHTML = htmlContent;
+                            return;
+                        }
+                        //myApp.alert('Could not find printer');
                         // htmlContent += '<li class="background-gray" style="color:red">' +
                         //     '<a href="printeroffline.html" class="item-content item-link">' +
                         //     '<div class="item-inner">' +
@@ -120,7 +131,7 @@ document.addEventListener('pageInit', function (e) {
                         // return;
                     }   // End of if (this.readystate...
                 };  // End of xmlhttp.onreadystatechange...
-                printerRequest.send();        
+                printerRequest.send();
             }); // End of globalArrayPrinterProfiles.forEach()
         } else {
             // Else from if (globalArrayPrinterProfiles.length) {

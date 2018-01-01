@@ -42,7 +42,7 @@ The app looks great so far. I've managed to reasonably mimic the original look a
 
 I'm now pulling data by querying the underlying [OctoPrint API](http://docs.octoprint.org/en/master/api/) which is running in the printer's computer. Work is progressing at a rapid pace and I anticipate that it will be completed soon.
 
-In it's current version (v1.2.1), it is a usable app for anyone with a Robo C2 with a single extruder.
+In it's current version (v1.2.2), it is a usable app for anyone with a Robo C2 with a single extruder.
 
 ### To-do
 
