@@ -111,13 +111,15 @@ document.addEventListener('pageInit', function (e) {
                         // Else from if (this.readystate...
                         if (this.readyState == 4 && this.status == 409) {
                             console.log('Printer returned a 409 error ["' + this.responseText + '"] (potentially okay for a test rig)');
-                            htmlContent += '<li class="background-gray">' +
-                                '<a href="' + objItem.appLandingPage + '.html" class="item-content item-link">' +
-                                '<div class="item-inner">' +
-                                '&bull; ' + objItem.name +
-                                '</div></a></li>';
-                            htmlContent += "</ul>";
-                            document.getElementById('idIndexPagePrinters').innerHTML = htmlContent;
+                            if (this.responseText == 'Printer is not operational') {
+                                htmlContent += '<li class="background-gray">' +
+                                    '<a href="' + objItem.appLandingPage + '.html" class="item-content item-link">' +
+                                    '<div class="item-inner">' +
+                                    '&bull; ' + objItem.name +
+                                    '</div></a></li>';
+                                htmlContent += "</ul>";
+                                document.getElementById('idIndexPagePrinters').innerHTML = htmlContent;
+                            }
                             return;
                         }
                         //myApp.alert('Could not find printer');
