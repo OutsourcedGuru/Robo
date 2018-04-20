@@ -4,6 +4,8 @@
 
 > [Robo 3D](https://robo3d.com) is a company in San Diego which makes 3D printers for the consumer market. This app is designed for their printers, specifically the C2 and R2 models. 
 
+> [OctoPrint](https://octoprint.org) is the underlying programming interface which is being exercised here under the hood of the printer. It's the product of the talented Gina Häußge.
+
 ![c2-r2-header](https://user-images.githubusercontent.com/15971213/32683766-b7311db8-c632-11e7-9f81-8d5e35315461.jpg)
 
 ## Overview
